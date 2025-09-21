@@ -8,12 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Scale, Upload, X, Clock } from 'lucide-react';
+import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Scale, Upload, X, Clock, Save } from 'lucide-react';
 import { Terminal } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 
 const initialState = {
   result: undefined,
@@ -83,7 +83,7 @@ function markdownToHtml(markdown: string): string {
 
 export function RecipeGenerator() {
   const [state, formAction] = useActionState(getRecipeAction, initialState);
-  const [pending, startTransition] = useTransition();
+  const [isPending, startTransition] = useTransition();
   const [ingredients, setIngredients] = useState('');
   const [allergies, setAllergies] = useState('');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -270,15 +270,15 @@ export function RecipeGenerator() {
                 </div>
             </div>
             <div className="flex justify-center items-center flex-wrap gap-4 mt-6 fade-in-up" style={{ animationDelay: '0.6s' }}>
-              <SubmitButton pending={pending} choice="recipe" />
-              <SubmitButton pending={pending} choice="preservation" />
+              <SubmitButton pending={isPending} choice="recipe" />
+              <SubmitButton pending={isPending} choice="preservation" />
             </div>
         </form>
 
         <div className="mt-8">
-            {pending && <div className="mx-auto loader"></div>}
+            {isPending && <div className="mx-auto loader"></div>}
 
-            {state.error && !pending && (
+            {state.error && !isPending && (
             <Alert variant="destructive" className="animate-in fade-in">
                 <Terminal className="h-4 w-4" />
                 <AlertTitle>Error</AlertTitle>
@@ -286,8 +286,19 @@ export function RecipeGenerator() {
             </Alert>
             )}
             
-            {currentContent && !pending && (
+            {currentContent && !isPending && (
               <div className="prose prose-lg max-w-none bg-card/80 p-6 mt-4 rounded-lg border animate-in fade-in-up duration-700">
+                <div className="flex justify-center -mt-12">
+                  <Button
+                    type="button"
+                    onClick={handleSaveContent}
+                    className="font-bold py-3 px-8 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl -translate-y-4"
+                  >
+                    <Save className="mr-2 h-4 w-4" />
+                    Save
+                  </Button>
+                </div>
+
                 {contentType === 'recipe' && nutrition && (
                   <div className="not-prose flex flex-wrap justify-around items-center mb-6 p-4 bg-muted/50 rounded-lg">
                     <div className="text-center p-2">
@@ -328,16 +339,6 @@ export function RecipeGenerator() {
                     </div>
                 )}
                 <div dangerouslySetInnerHTML={{ __html: markdownToHtml(currentContent) }} />
-                 <div className="flex justify-center mt-6">
-                  <Button
-                    type="button"
-                    onClick={handleSaveContent}
-                    variant="secondary"
-                    className="font-bold py-3 px-8 rounded-full hover:bg-secondary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-                  >
-                    Save Recipe
-                  </Button>
-                </div>
               </div>
             )}
         </div>
@@ -345,5 +346,3 @@ export function RecipeGenerator() {
     </Card>
   );
 }
-
-    
