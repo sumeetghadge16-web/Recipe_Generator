@@ -37,11 +37,6 @@ export default function Home() {
 
         <section className="bg-card/80 backdrop-blur-md rounded-2xl shadow-xl p-6 md:p-8 border animate-in fade-in zoom-in-95 duration-500">
           <Tabs defaultValue="generate">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="generate">Generate</TabsTrigger>
-              <TabsTrigger value="saved">My Saved Recipes</TabsTrigger>
-              <TabsTrigger value="preservatives">Preservatives</TabsTrigger>
-            </TabsList>
             <TabsContent value="generate">
                 <RecipeGenerator />
             </TabsContent>
@@ -51,6 +46,11 @@ export default function Home() {
             <TabsContent value="preservatives">
                 <Preservatives />
             </TabsContent>
+            <TabsList className="grid w-full grid-cols-3 mt-4">
+              <TabsTrigger value="generate">Generate</TabsTrigger>
+              <TabsTrigger value="saved">My Saved Recipes</TabsTrigger>
+              <TabsTrigger value="preservatives">Preservatives</TabsTrigger>
+            </TabsList>
           </Tabs>
         </section>
       </div>
