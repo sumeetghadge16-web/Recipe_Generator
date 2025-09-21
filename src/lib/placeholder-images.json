@@ -2,15 +2,21 @@
   "placeholderImages": [
     {
       "id": "recipe-hero",
-      "description": "A vibrant and healthy salad bowl, symbolizing fresh ingredients.",
-      "imageUrl": "https://picsum.photos/seed/recipe-hero/1080/256",
-      "imageHint": "food bowl"
+      "description": "A collection of delicious food bowls.",
+      "imageUrl": "https://storage.googleapis.com/studioprompt-images/34e0622a-8c50-4828-b8a9-4458f447702b/image.png",
+      "imageHint": "food variety"
     },
     {
       "id": "background-food",
-      "description": "A vibrant and healthy food background",
-      "imageUrl": "https://picsum.photos/seed/background-food/1920/1080",
-      "imageHint": "food ingredients"
+      "description": "A dark background with various food items and ingredients.",
+      "imageUrl": "https://storage.googleapis.com/studioprompt-images/34e0622a-8c50-4828-b8a9-4458f447702b/image.png",
+      "imageHint": "dark food"
+    },
+    {
+      "id": "saved-recipes-hero",
+      "description": "A person writing in a recipe book.",
+      "imageUrl": "https://picsum.photos/seed/saved-recipes/1080/256",
+      "imageHint": "recipe book"
     }
   ]
 }
