@@ -2,21 +2,21 @@
   "placeholderImages": [
     {
       "id": "recipe-hero",
-      "description": "A vibrant flat lay of fresh vegetables and ingredients on a rustic wooden table.",
-      "imageUrl": "https://picsum.photos/seed/recipe-hero-new/1080/256",
-      "imageHint": "fresh ingredients"
+      "description": "A colorful assortment of fresh vegetables on a rustic background.",
+      "imageUrl": "https://picsum.photos/seed/fresh-veggies/1080/256",
+      "imageHint": "fresh vegetables"
     },
     {
       "id": "background-food",
-      "description": "A subtle, dark-textured background with out-of-focus herbs and spices.",
-      "imageUrl": "https://picsum.photos/seed/background-food-new/1920/1080",
-      "imageHint": "dark kitchen"
+      "description": "A dark and moody shot of root vegetables.",
+      "imageUrl": "https://picsum.photos/seed/dark-veggies/1920/1080",
+      "imageHint": "dark vegetables"
     },
     {
       "id": "saved-recipes-hero",
-      "description": "An open recipe book on a kitchen counter, surrounded by baking ingredients.",
-      "imageUrl": "https://picsum.photos/seed/saved-recipes-new/1080/256",
-      "imageHint": "recipe book kitchen"
+      "description": "A beautifully plated dish, ready to be served.",
+      "imageUrl": "https://picsum.photos/seed/plated-dish/1080/256",
+      "imageHint": "plated dish"
     }
   ]
 }
