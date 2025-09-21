@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal } from 'lucide-react';
+import Link from 'next/link';
 
 const initialState = {
   recipeMarkdown: undefined,
@@ -133,11 +134,15 @@ export function RecipeGenerator() {
             <Button
               type="button"
               onClick={handleSaveRecipe}
-              className="bg-accent text-accent-foreground font-bold py-3 px-8 rounded-full hover:bg-accent/90 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+              variant="secondary"
+              className="font-bold py-3 px-8 rounded-full hover:bg-secondary/90 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
             >
               Save Recipe
             </Button>
           )}
+           <Link href="/saved-recipes" passHref>
+                <Button variant="outline" className="font-bold py-3 px-8 rounded-full hover:bg-accent/10 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">My Saved Recipes</Button>
+            </Link>
         </div>
       </form>
 
