@@ -3,14 +3,14 @@
     {
       "id": "recipe-hero",
       "description": "A delicious salmon dish with asparagus.",
-      "imageUrl": "https://i.postimg.cc/WDcvVgfq/jonathan-borba-8l8Yl2ruUsg-unsplash.jpg",
+      "imageUrl": "https://storage.googleapis.com/studioprompt-images/34e0622a-8c50-4828-b8a9-4458f447702b/image.png",
       "imageHint": "salmon dish"
     },
     {
       "id": "background-food",
-      "description": "A dark, moody shot of various cooking ingredients.",
-      "imageUrl": "https://storage.googleapis.com/studioprompt-images/34e0622a-8c50-4828-b8a9-4458f447702b/image.png",
-      "imageHint": "dark food ingredients"
+      "description": "A delicious salmon dish with asparagus.",
+      "imageUrl": "https://i.postimg.cc/WDcvVgfq/jonathan-borba-8l8Yl2ruUsg-unsplash.jpg",
+      "imageHint": "salmon dish"
     },
     {
       "id": "saved-recipes-hero",
