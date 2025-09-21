@@ -39,24 +39,24 @@ function markdownToHtml(markdown: string): string {
       if (line.startsWith('## ')) {
         if (inUl) { html += '</ul>'; inUl = false; }
         if (inOl) { html += '</ol>'; inOl = false; }
-        html += `<h2 class="text-3xl font-bold mt-6 mb-4 text-center">${line.substring(3)}</h2>`;
+        html += `<h2 class="text-3xl font-bold mt-6 mb-4 text-center text-primary">${line.substring(3)}</h2>`;
         continue;
       }
       if (line.startsWith('### ')) {
         if (inUl) { html += '</ul>'; inUl = false; }
         if (inOl) { html += '</ol>'; inOl = false; }
-        html += `<h3 class="text-2xl font-semibold mt-6 mb-3 border-b-2 border-primary pb-2">${line.substring(4)}</h3>`;
+        html += `<h3 class="text-2xl font-semibold mt-6 mb-3 border-b-2 border-primary pb-2 text-primary/90">${line.substring(4)}</h3>`;
         continue;
       }
       if (line.startsWith('* ')) {
         if (inOl) { html += '</ol>'; inOl = false; }
-        if (!inUl) { html += '<ul class="list-disc pl-6 space-y-2">'; inUl = true; }
+        if (!inUl) { html += '<ul class="list-disc pl-6 space-y-2 text-foreground/90">'; inUl = true; }
         html += `<li class="text-base">${line.substring(2)}</li>`;
         continue;
       }
       if (line.match(/^\d+\. /)) {
         if (inUl) { html += '</ul>'; inUl = false; }
-        if (!inOl) { html += '<ol class="list-decimal pl-6 space-y-3">'; inOl = true; }
+        if (!inOl) { html += '<ol class="list-decimal pl-6 space-y-3 text-foreground/90">'; inOl = true; }
         html += `<li class="text-base">${line.replace(/^\d+\. /, '')}</li>`;
         continue;
       }
@@ -67,7 +67,7 @@ function markdownToHtml(markdown: string): string {
       let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   
       if (processedLine.trim()) {
-        html += `<p class="mb-4 text-base leading-relaxed">${processedLine}</p>`;
+        html += `<p class="mb-4 text-base leading-relaxed text-foreground/80">${processedLine}</p>`;
       }
     }
   
