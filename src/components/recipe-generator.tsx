@@ -21,11 +21,11 @@ const initialState = {
   timestamp: Date.now(),
 };
 
-function SubmitButton({ pending, choice }: { pending: boolean; choice: 'recipe' | 'preservation' }) {
-    const text = choice === 'recipe' ? 'Generating Recipe...' : 'Generating Plan...';
-    const buttonText = choice === 'recipe' ? 'Generate Recipe' : 'Preserve Food';
+function SubmitButton({ pending }: { pending: boolean }) {
+    const text = 'Generating...';
+    const buttonText = 'Generate Recipe';
     return (
-      <Button type="submit" name="choice" value={choice} disabled={pending} className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-full hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:scale-100 disabled:cursor-not-allowed">
+      <Button type="submit" disabled={pending} className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-full hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:scale-100 disabled:cursor-not-allowed">
         {pending ? text : buttonText}
       </Button>
     );
@@ -99,7 +99,32 @@ export function RecipeGenerator() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.timestamp]);
 
-  const { content: currentContent, nutrition, healthAnalysis, preservationDays, type: contentType } = lastSuccessfulResult || {};
+  const { recipe, preservation } = lastSuccessfulResult || {};
+  const { content: currentContent, nutrition, healthAnalysis } = recipe || {};
+  const { content: preservationContent, preservationDays } = preservation || {};
+
+  useEffect(() => {
+    if (preservationContent) {
+        try {
+            let savedContent = JSON.parse(localStorage.getItem('savedContent') || '[]');
+            const titleMatch = preservationContent.match(/^##\s*(.*)$/m);
+            const title = titleMatch ? titleMatch[1].trim() : "Untitled Preservation Plan";
+            const isDuplicate = savedContent.some(item => item.title === title && item.content === preservationContent);
+
+            if (!isDuplicate) {
+                savedContent.push({ title: title, content: preservationContent, savedAt: new Date().toISOString(), type: 'preservation' });
+                localStorage.setItem('savedContent', JSON.stringify(savedContent));
+                toast({
+                    title: "Preservation Plan Saved!",
+                    description: `"${title}" has been auto-saved to your 'Preservatives' tab.`,
+                });
+            }
+        } catch (error) {
+            console.error("Could not save preservation plan:", error);
+        }
+    }
+  }, [preservationContent, toast]);
+
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -140,7 +165,7 @@ export function RecipeGenerator() {
         const isDuplicate = savedContent.some(item => item.title === title && item.content === currentContent);
 
         if (!isDuplicate) {
-          savedContent.push({ title: title, content: currentContent, savedAt: new Date().toISOString(), type: contentType });
+          savedContent.push({ title: title, content: currentContent, savedAt: new Date().toISOString(), type: 'recipe' });
           localStorage.setItem('savedContent', JSON.stringify(savedContent));
           toast({
             title: "Content Saved!",
@@ -270,8 +295,7 @@ export function RecipeGenerator() {
                 </div>
             </div>
             <div className="flex justify-center items-center flex-wrap gap-4 mt-6 fade-in-up" style={{ animationDelay: '0.6s' }}>
-              <SubmitButton pending={isPending} choice="recipe" />
-              <SubmitButton pending={isPending} choice="preservation" />
+              <SubmitButton pending={isPending} />
             </div>
         </form>
 
@@ -295,11 +319,11 @@ export function RecipeGenerator() {
                     className="font-bold py-3 px-8 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl -translate-y-4"
                   >
                     <Save className="mr-2 h-4 w-4" />
-                    Save
+                    Save Recipe
                   </Button>
                 </div>
 
-                {contentType === 'recipe' && nutrition && (
+                {nutrition && (
                   <div className="not-prose flex flex-wrap justify-around items-center mb-6 p-4 bg-muted/50 rounded-lg">
                     <div className="text-center p-2">
                       <Flame className="mx-auto h-8 w-8 text-red-500" />
@@ -323,16 +347,7 @@ export function RecipeGenerator() {
                     </div>
                   </div>
                 )}
-                 {contentType === 'preservation' && preservationDays && (
-                  <div className="not-prose flex justify-center items-center gap-4 mb-6 p-4 bg-muted/50 rounded-lg">
-                      <Clock className="h-8 w-8 text-sky-500" />
-                      <div>
-                          <p className="font-bold text-lg">{preservationDays}</p>
-                          <p className="text-sm text-muted-foreground">Preservation Time</p>
-                      </div>
-                  </div>
-                )}
-
+                
                 {healthAnalysis && (
                     <div className="not-prose my-6 flex justify-center">
                         <HealthAnalysisBadge />

@@ -16,19 +16,13 @@ export async function getRecipeAction(
   const ingredients = formData.get('ingredients') as string;
   const allergies = formData.get('allergies') as string;
   const photoDataUri = formData.get('photoDataUri') as string | undefined;
-  const choice = formData.get('choice') as 'recipe' | 'preservation' | null;
 
   if (!photoDataUri && (!ingredients || ingredients.trim().length === 0)) {
     return { error: 'Please enter at least one ingredient or upload a photo to generate a recipe.' };
   }
-  
-  if (!choice) {
-    return { error: 'Please select whether you want a recipe or a preservation plan.' };
-  }
-
 
   try {
-    const result = await generateRecipeFromIngredients({ ingredients, allergies, photoDataUri, choice });
+    const result = await generateRecipeFromIngredients({ ingredients, allergies, photoDataUri });
     return { result, timestamp: Date.now() };
   } catch (e) {
     console.error(e);

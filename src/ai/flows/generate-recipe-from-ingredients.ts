@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview AI agent that generates a recipe or preservation plan from a list of ingredients.
+ * @fileOverview AI agent that generates a recipe and a preservation plan from a list of ingredients.
  *
  * - generateRecipeFromIngredients - A function that handles the generation process.
  * - GenerateRecipeFromIngredientsInput - The input type for the function.
@@ -25,44 +25,39 @@ const GenerateRecipeFromIngredientsInputSchema = z.object({
     .describe(
       "An optional photo of the ingredients, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
-  choice: z
-    .enum(['recipe', 'preservation'])
-    .describe(
-      'The user\'s choice to either generate a recipe or a preservation plan.'
-    ),
 });
 export type GenerateRecipeFromIngredientsInput = z.infer<
   typeof GenerateRecipeFromIngredientsInputSchema
 >;
 
 const GenerateRecipeFromIngredientsOutputSchema = z.object({
-  content: z.string().describe('The generated content in markdown format.'),
-  nutrition: z
-    .object({
-      calories: z.string().describe('Estimated calories per serving.'),
-      fat: z.string().describe('Estimated fat content in grams per serving.'),
-      protein: z
-        .string()
-        .describe('Estimated protein content in grams per serving.'),
-      sugar: z.string().describe('Estimated sugar content in grams per serving.'),
-    })
-    .optional()
-    .describe('Estimated nutritional information per serving for recipes.'),
-  healthAnalysis: z
-    .string()
-    .optional()
-    .describe(
-      'A brief, one-sentence analysis on whether the recipe is more suitable for weight loss, weight gain, or maintenance.'
-    ),
-  preservationDays: z
-    .string()
-    .optional()
-    .describe(
-      'An estimation of how many days the food can be preserved using the provided plan.'
-    ),
-  type: z
-    .enum(['recipe', 'preservation'])
-    .describe('The type of content generated.'),
+  recipe: z.object({
+    content: z.string().describe('The generated recipe in markdown format.'),
+    nutrition: z
+      .object({
+        calories: z.string().describe('Estimated calories per serving.'),
+        fat: z.string().describe('Estimated fat content in grams per serving.'),
+        protein: z
+          .string()
+          .describe('Estimated protein content in grams per serving.'),
+        sugar: z.string().describe('Estimated sugar content in grams per serving.'),
+      })
+      .describe('Estimated nutritional information per serving for the recipe.'),
+    healthAnalysis: z
+      .string()
+      .describe(
+        'A brief, one-sentence analysis on whether the recipe is more suitable for weight loss, weight gain, or maintenance.'
+      ),
+  }),
+  preservation: z.object({
+      content: z.string().describe('The generated preservation plan in markdown format.'),
+      preservationDays: z
+      .string()
+      .describe(
+        'An estimation of how many days the food can be preserved using the provided plan.'
+      ),
+  })
+
 });
 export type GenerateRecipeFromIngredientsOutput = z.infer<
   typeof GenerateRecipeFromIngredientsOutputSchema
@@ -78,7 +73,7 @@ const generateContentPrompt = ai.definePrompt({
   name: 'generateContentPrompt',
   input: {schema: GenerateRecipeFromIngredientsInputSchema},
   output: {schema: GenerateRecipeFromIngredientsOutputSchema},
-  prompt: `You are a world-class creative chef and food preservation expert. Your mission is to provide a helpful response based on the user's ingredients and their chosen goal.
+  prompt: `You are a world-class creative chef and food preservation expert. Your mission is to provide a helpful response based on the user's ingredients. You will generate both a recipe and a preservation plan.
 
 You will use the text description and, if provided, a photo of the ingredients as your primary sources of information. If a photo is provided, you MUST identify the ingredients in the photo and use them as the primary ingredients.
 
@@ -94,12 +89,9 @@ Photo of ingredients: {{media url=photoDataUri}}
 **Allergy Alert:** The user is allergic to the following: {{{allergies}}}. You MUST NOT include any of these ingredients or their derivatives in your response.
 {{/if}}
 
-**User's Goal:** The user wants to '{{choice}}'.
-
 ---
 
-{{#if (eq choice "recipe")}}
-**Task: Generate a Recipe**
+**Task 1: Generate a Recipe**
 
 **Rules:**
 1.  **Primary Ingredients:** You MUST use the ingredients provided by the user.
@@ -114,10 +106,11 @@ Photo of ingredients: {{media url=photoDataUri}}
     - Provide estimated prep time and cook time.
 5.  **Nutrition:** Provide an estimated nutritional breakdown per serving for calories, fat, protein, and sugar.
 6.  **Health Analysis:** Provide a brief, one-sentence analysis on whether the recipe is better for weight loss, gain, or maintenance.
-7.  **Output Fields:** Set 'type' to 'recipe'. Fill the 'content', 'nutrition' and 'healthAnalysis' fields. 'preservationDays' should be null.
+7.  **Output Fields:** Fill the 'recipe.content', 'recipe.nutrition' and 'recipe.healthAnalysis' fields.
 
-{{else if (eq choice "preservation")}}
-**Task: Create a Preservation Plan**
+---
+
+**Task 2: Create a Preservation Plan**
 
 **Rules:**
 1.  **Analyze Ingredients:** Identify the best preservation method for the provided ingredients (e.g., refrigeration, freezing, pickling, drying).
@@ -128,11 +121,9 @@ Photo of ingredients: {{media url=photoDataUri}}
     - The title should be a Level 2 Heading (##), like "## Preservation Plan for Your Ingredients".
     - Use Level 3 Headings (###) for each ingredient or method (e.g., "### Freezing Berries," "### Refrigerating Leafy Greens").
     - Use numbered lists for instructions.
-6.  **Output Fields:** Set 'type' to 'preservation'. Fill the 'content' and 'preservationDays' fields. 'nutrition' and 'healthAnalysis' should be null.
+6.  **Output Fields:** Fill the 'preservation.content' and 'preservation.preservationDays' fields.
 
-{{/if}}
-
-Generate the content based on the user's choice.`,
+Generate both the recipe and the preservation plan.`,
 });
 
 const generateRecipeFromIngredientsFlow = ai.defineFlow(
