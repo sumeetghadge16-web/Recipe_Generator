@@ -26,7 +26,7 @@ Recipe Generator is a web app that helps you turn the ingredients you already ha
 
 - **Frontend**: React (Next.js)  
 - **Styling**: Tailwind CSS  
-- **API**: AI/LLM powered recipe generation (e.g., Google Gemini / OpenAI — update as per your implementation)  
+- **API**: AI/LLM powered recipe generation (Google Gemini )  
 - **Hosting**: Vercel  
 
 ---
