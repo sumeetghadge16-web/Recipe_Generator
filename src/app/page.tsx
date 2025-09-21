@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { RecipeGenerator } from '@/components/recipe-generator';
 import { SavedRecipes } from '@/components/saved-recipes';
+import { Preservatives } from '@/components/preservatives';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Home() {
@@ -36,15 +37,19 @@ export default function Home() {
 
         <section className="bg-card/80 backdrop-blur-md rounded-2xl shadow-xl p-6 md:p-8 border animate-in fade-in zoom-in-95 duration-500">
           <Tabs defaultValue="generate">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="generate">Generate Recipe</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="generate">Generate</TabsTrigger>
               <TabsTrigger value="saved">My Saved Recipes</TabsTrigger>
+              <TabsTrigger value="preservatives">Preservatives</TabsTrigger>
             </TabsList>
             <TabsContent value="generate">
                 <RecipeGenerator />
             </TabsContent>
             <TabsContent value="saved">
                 <SavedRecipes />
+            </TabsContent>
+            <TabsContent value="preservatives">
+                <Preservatives />
             </TabsContent>
           </Tabs>
         </section>

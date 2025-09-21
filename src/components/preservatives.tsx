@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 interface SavedContent {
   title: string;
@@ -76,7 +76,7 @@ function markdownToHtml(markdown: string): string {
 }
 
 
-export function SavedRecipes() {
+export function Preservatives() {
   const [savedContent, setSavedContent] = useState<SavedContent[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isMounted, setIsMounted] = useState(false);
@@ -92,17 +92,17 @@ export function SavedRecipes() {
     }
   }, []);
 
-  const filteredRecipes = useMemo(() => {
+  const filteredPreservations = useMemo(() => {
     if (!isMounted) return [];
     return savedContent.filter(item => 
-      item.type === 'recipe' &&
+      item.type === 'preservation' &&
       (item.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
       item.content.toLowerCase().includes(searchTerm.toLowerCase()))
     );
   }, [savedContent, searchTerm, isMounted]);
   
-  const handleDeleteRecipe = (recipeTitle: string) => {
-    const updatedContent = savedContent.filter(r => r.title !== recipeTitle);
+  const handleDelete = (itemTitle: string) => {
+    const updatedContent = savedContent.filter(r => r.title !== itemTitle);
     localStorage.setItem('savedContent', JSON.stringify(updatedContent));
     setSavedContent(updatedContent);
   };
@@ -115,32 +115,32 @@ export function SavedRecipes() {
   return (
     <Card>
         <CardHeader>
-            <CardTitle>My Saved Recipes</CardTitle>
-            <CardDescription>Your personal collection of culinary creations.</CardDescription>
+            <CardTitle>My Saved Preservation Plans</CardTitle>
+            <CardDescription>Your personal collection of food preservation guides.</CardDescription>
         </CardHeader>
         <CardContent>
             <div className="mb-6">
                 <Input 
                     type="text"
-                    placeholder="Search saved recipes..."
+                    placeholder="Search saved plans..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="max-w-md mx-auto"
                 />
             </div>
 
-            {filteredRecipes.length === 0 ? (
+            {filteredPreservations.length === 0 ? (
               <div className="text-center border-2 border-dashed border-border rounded-lg p-8">
-                <p className="text-xl text-muted-foreground">You haven't saved any recipes yet.</p>
-                <p className="text-muted-foreground mt-2">Generated recipes can be saved here.</p>
+                <p className="text-xl text-muted-foreground">You haven't saved any preservation plans yet.</p>
+                <p className="text-muted-foreground mt-2">Generated plans can be saved here.</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredRecipes.map((recipe, index) => (
+                {filteredPreservations.map((item, index) => (
                   <Card key={index} className="flex flex-col">
                     <CardHeader>
-                      <CardTitle className="truncate">{recipe.title}</CardTitle>
-                      <CardDescription>Saved on: {new Date(recipe.savedAt).toLocaleDateString()}</CardDescription>
+                      <CardTitle className="truncate">{item.title}</CardTitle>
+                      <CardDescription>Saved on: {new Date(item.savedAt).toLocaleDateString()}</CardDescription>
                     </CardHeader>
                     <CardFooter className="mt-auto p-4 bg-muted/50 flex justify-between items-center">
                       <Dialog>
@@ -149,10 +149,10 @@ export function SavedRecipes() {
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl max-h-[90vh]">
                           <DialogHeader>
-                            <DialogTitle>{recipe.title}</DialogTitle>
+                            <DialogTitle>{item.title}</DialogTitle>
                           </DialogHeader>
                           <div className="p-6 overflow-y-auto max-h-[calc(90vh-130px)] prose dark:prose-invert max-w-none">
-                            <div dangerouslySetInnerHTML={{ __html: markdownToHtml(recipe.content) }} />
+                            <div dangerouslySetInnerHTML={{ __html: markdownToHtml(item.content) }} />
                           </div>
                         </DialogContent>
                       </Dialog>
@@ -165,12 +165,12 @@ export function SavedRecipes() {
                           <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete your recipe for "{recipe.title}".
+                              This action cannot be undone. This will permanently delete your plan for "{item.title}".
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDeleteRecipe(recipe.title)}>Delete</AlertDialogAction>
+                            <AlertDialogAction onClick={() => handleDelete(item.title)}>Delete</AlertDialogAction>
                           </AlertDialogFooter>
                         </AlertDialogContent>
                       </AlertDialog>

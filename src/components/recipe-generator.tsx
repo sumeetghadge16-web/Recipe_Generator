@@ -1,20 +1,20 @@
 
 'use client';
 
-import { useActionState, useEffect, useState, useMemo, useRef } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useState, useMemo, useRef, useTransition } from 'react';
 import Image from 'next/image';
 import { getRecipeAction } from '@/app/actions';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Scale, Upload, X } from 'lucide-react';
+import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Scale, Upload, X, Clock } from 'lucide-react';
 import { Terminal } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const initialState = {
   result: undefined,
@@ -22,15 +22,15 @@ const initialState = {
   timestamp: Date.now(),
 };
 
-function SubmitButton() {
-  const { pending } = useFormStatus();
-
-  return (
-    <Button type="submit" disabled={pending} className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-full hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:scale-100 disabled:cursor-not-allowed">
-      {pending ? 'Generating...' : 'Generate Recipe'}
-    </Button>
-  );
-}
+function SubmitButton({ pending, choice }: { pending: boolean; choice: 'recipe' | 'preservation' }) {
+    const text = choice === 'recipe' ? 'Generating Recipe...' : 'Generating Plan...';
+    const buttonText = choice === 'recipe' ? 'Generate Recipe' : 'Preserve Food';
+    return (
+      <Button type="submit" name="choice" value={choice} disabled={pending} className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-full hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:scale-100 disabled:cursor-not-allowed">
+        {pending ? text : buttonText}
+      </Button>
+    );
+  }
 
 function markdownToHtml(markdown: string): string {
     if (!markdown) return '';
@@ -84,7 +84,7 @@ function markdownToHtml(markdown: string): string {
 
 export function RecipeGenerator() {
   const [state, formAction] = useActionState(getRecipeAction, initialState);
-  const { pending } = useFormStatus();
+  const [pending, startTransition] = useTransition();
   const [ingredients, setIngredients] = useState('');
   const [allergies, setAllergies] = useState('');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -92,18 +92,20 @@ export function RecipeGenerator() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
-  const currentRecipe = useMemo(() => state.result?.recipe, [state.timestamp]);
+  const currentContent = useMemo(() => state.result?.content, [state.timestamp]);
   const nutrition = useMemo(() => state.result?.nutrition, [state.timestamp]);
   const healthAnalysis = useMemo(() => state.result?.healthAnalysis, [state.timestamp]);
+  const preservationDays = useMemo(() => state.result?.preservationDays, [state.timestamp]);
+  const contentType = useMemo(() => state.result?.type, [state.timestamp]);
+
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      formRef.current?.requestSubmit();
-    }
+  const handleFormAction = (formData: FormData) => {
+    startTransition(() => {
+      formAction(formData);
+    });
   };
-  
+
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -125,35 +127,35 @@ export function RecipeGenerator() {
     }
   };
 
-  const handleSaveRecipe = () => {
-    if (currentRecipe) {
+  const handleSaveContent = () => {
+    if (currentContent) {
       try {
-        let savedRecipes = JSON.parse(localStorage.getItem('savedRecipes') || '[]');
-        const recipeTitleMatch = currentRecipe.match(/^##\s*(.*)$/m);
-        const title = recipeTitleMatch ? recipeTitleMatch[1].trim() : "Untitled Recipe";
+        let savedContent = JSON.parse(localStorage.getItem('savedContent') || '[]');
+        const titleMatch = currentContent.match(/^##\s*(.*)$/m);
+        const title = titleMatch ? titleMatch[1].trim() : "Untitled";
 
-        const isDuplicate = savedRecipes.some(recipe => recipe.title === title && recipe.content === currentRecipe);
+        const isDuplicate = savedContent.some(item => item.title === title && item.content === currentContent);
 
         if (!isDuplicate) {
-          savedRecipes.push({ title: title, content: currentRecipe, savedAt: new Date().toISOString() });
-          localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
+          savedContent.push({ title: title, content: currentContent, savedAt: new Date().toISOString(), type: contentType });
+          localStorage.setItem('savedContent', JSON.stringify(savedContent));
           toast({
-            title: "Recipe Saved!",
+            title: "Content Saved!",
             description: `"${title}" has been saved successfully.`,
           });
         } else {
           toast({
             variant: "destructive",
             title: "Already Saved",
-            description: "This recipe is already in your saved list.",
+            description: "This content is already in your saved list.",
           });
         }
       } catch (error) {
-        console.error("Could not save recipe:", error);
+        console.error("Could not save content:", error);
         toast({
             variant: "destructive",
             title: "Error",
-            description: "Failed to save recipe.",
+            description: "Failed to save content.",
         });
       }
     }
@@ -194,17 +196,17 @@ export function RecipeGenerator() {
   return (
     <Card>
         <CardHeader>
-            <CardTitle>Generate a New Recipe</CardTitle>
+            <CardTitle>Generate a New Recipe or Preservation Plan</CardTitle>
         </CardHeader>
       <CardContent>
-        <form ref={formRef} action={formAction} className="text-center">
+        <form ref={formRef} action={handleFormAction} className="text-center">
             <div className='max-w-xl mx-auto'>
                 <div className="fade-in-up" style={{ animationDelay: '0.2s' }}>
                     <Label htmlFor="ingredientsInput" className="block text-xl font-semibold text-foreground mb-2">
                         What ingredients do you have?
                     </Label>
                     <p className="text-muted-foreground mb-4">
-                        Type your ingredients and press Enter, or upload a photo.
+                        Type your ingredients or upload a photo.
                     </p>
                     <div className="flex gap-4">
                         <Textarea
@@ -215,7 +217,6 @@ export function RecipeGenerator() {
                         placeholder="e.g., chicken, broccoli, garlic..."
                         value={ingredients}
                         onChange={(e) => setIngredients(e.target.value)}
-                        onKeyDown={handleKeyDown}
                         />
                          <div className="relative w-24 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-background/70 hover:border-primary transition-colors flex-shrink-0">
                             <input
@@ -269,7 +270,8 @@ export function RecipeGenerator() {
                 </div>
             </div>
             <div className="flex justify-center items-center flex-wrap gap-4 mt-6 fade-in-up" style={{ animationDelay: '0.6s' }}>
-              <SubmitButton />
+              <SubmitButton pending={pending} choice="recipe" />
+              <SubmitButton pending={pending} choice="preservation" />
             </div>
         </form>
 
@@ -284,9 +286,9 @@ export function RecipeGenerator() {
             </Alert>
             )}
             
-            {currentRecipe && !pending && (
+            {currentContent && !pending && (
               <div className="prose prose-lg max-w-none bg-card/80 p-6 mt-4 rounded-lg border animate-in fade-in-up duration-700">
-                {nutrition && (
+                {contentType === 'recipe' && nutrition && (
                   <div className="not-prose flex flex-wrap justify-around items-center mb-6 p-4 bg-muted/50 rounded-lg">
                     <div className="text-center p-2">
                       <Flame className="mx-auto h-8 w-8 text-red-500" />
@@ -310,26 +312,35 @@ export function RecipeGenerator() {
                     </div>
                   </div>
                 )}
+                 {contentType === 'preservation' && preservationDays && (
+                  <div className="not-prose flex justify-center items-center gap-4 mb-6 p-4 bg-muted/50 rounded-lg">
+                      <Clock className="h-8 w-8 text-sky-500" />
+                      <div>
+                          <p className="font-bold text-lg">{preservationDays}</p>
+                          <p className="text-sm text-muted-foreground">Preservation Days</p>
+                      </div>
+                  </div>
+                )}
 
                 {healthAnalysis && (
                     <div className="not-prose my-6 flex justify-center">
                         <HealthAnalysisBadge />
                     </div>
                 )}
-                <div dangerouslySetInnerHTML={{ __html: markdownToHtml(currentRecipe) }} />
+                <div dangerouslySetInnerHTML={{ __html: markdownToHtml(currentContent) }} />
               </div>
             )}
         </div>
       </CardContent>
-      {currentRecipe && !pending && (
+      {currentContent && !pending && (
         <CardFooter className="justify-center">
             <Button
               type="button"
-              onClick={handleSaveRecipe}
+              onClick={handleSaveContent}
               variant="secondary"
               className="font-bold py-3 px-8 rounded-full hover:bg-secondary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
-              Save Recipe
+              Save
             </Button>
         </CardFooter>
       )}
