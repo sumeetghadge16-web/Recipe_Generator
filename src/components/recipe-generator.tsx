@@ -120,6 +120,8 @@ export function RecipeGenerator() {
               errorMessage = 'Audio capture failed. Please ensure your microphone is working.';
             } else if (event.error === 'not-allowed') {
               errorMessage = 'Microphone access denied. Please enable it in your browser settings.';
+            } else if (event.error === 'network') {
+              errorMessage = 'A network error occurred. Please check your internet connection and try again.';
             }
             toast({
               variant: 'destructive',
