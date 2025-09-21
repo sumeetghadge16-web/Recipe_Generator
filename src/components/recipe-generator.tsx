@@ -181,35 +181,25 @@ export function RecipeGenerator() {
     <div>
       <form action={formAction} className="text-center">
         <div className='max-w-xl mx-auto'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                <div>
-                    <Label htmlFor="ingredientsInput" className="block text-xl font-semibold text-foreground mb-2">
-                      What ingredients do you have?
-                    </Label>
-                    <p className="text-muted-foreground mb-4">
-                      Enter a few items (e.g., "chicken breast, tomatoes, rice") and let the AI agent create a recipe for you!
-                    </p>
-                    <div className="relative w-full">
-                      <Textarea
-                        id="ingredientsInput"
-                        name="ingredients"
-                        rows={4}
-                        className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
-                        placeholder="e.g., chicken, broccoli, garlic, lemon, olive oil..."
-                        value={ingredients}
-                        onChange={(e) => setIngredients(e.target.value)}
-                        required
-                      />
-                    </div>
-                </div>
-                <div>
-                    <Label htmlFor="photoInput" className="block text-xl font-semibold text-foreground mb-2">
-                      Upload a photo <span className="text-sm text-muted-foreground">(Optional)</span>
-                    </Label>
-                    <p className="text-muted-foreground mb-4">
-                      Show the AI what your ingredients look like for a better recipe.
-                    </p>
-                    <div className="relative w-full h-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-background hover:border-primary transition-colors">
+            <div>
+                <Label htmlFor="ingredientsInput" className="block text-xl font-semibold text-foreground mb-2">
+                    What ingredients do you have?
+                </Label>
+                <p className="text-muted-foreground mb-4">
+                    Enter a few items (e.g., "chicken breast, tomatoes, rice") and let the AI agent create a recipe for you!
+                </p>
+                <div className="flex gap-4">
+                    <Textarea
+                    id="ingredientsInput"
+                    name="ingredients"
+                    rows={4}
+                    className="flex-grow p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
+                    placeholder="e.g., chicken, broccoli, garlic, lemon, olive oil..."
+                    value={ingredients}
+                    onChange={(e) => setIngredients(e.target.value)}
+                    required
+                    />
+                     <div className="relative w-24 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-background hover:border-primary transition-colors flex-shrink-0">
                         <input
                             type="file"
                             id="photoInput"
@@ -225,16 +215,16 @@ export function RecipeGenerator() {
                                     type="button"
                                     variant="destructive"
                                     size="icon"
-                                    className="absolute top-2 right-2 h-6 w-6 z-10"
+                                    className="absolute top-1 right-1 h-5 w-5 z-10"
                                     onClick={handleRemovePhoto}
                                 >
-                                    <X className="h-4 w-4" />
+                                    <X className="h-3 w-3" />
                                 </Button>
                             </>
                         ) : (
-                            <div className="text-center text-muted-foreground">
-                                <Upload className="mx-auto h-8 w-8" />
-                                <p>Click to upload</p>
+                            <div className="text-center text-muted-foreground p-1">
+                                <Upload className="mx-auto h-6 w-6" />
+                                <p className="text-xs mt-1">Upload</p>
                             </div>
                         )}
                     </div>
