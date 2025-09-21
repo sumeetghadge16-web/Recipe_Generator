@@ -14,7 +14,6 @@ import { Badge } from './ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 const initialState = {
   result: undefined,
@@ -92,11 +91,15 @@ export function RecipeGenerator() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
-  const currentContent = useMemo(() => state.result?.content, [state.timestamp]);
-  const nutrition = useMemo(() => state.result?.nutrition, [state.timestamp]);
-  const healthAnalysis = useMemo(() => state.result?.healthAnalysis, [state.timestamp]);
-  const preservationDays = useMemo(() => state.result?.preservationDays, [state.timestamp]);
-  const contentType = useMemo(() => state.result?.type, [state.timestamp]);
+  const lastSuccessfulResult = useMemo(() => {
+    if (state.result) {
+      return state.result;
+    }
+    return null;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.timestamp]);
+
+  const { content: currentContent, nutrition, healthAnalysis, preservationDays, type: contentType } = lastSuccessfulResult || {};
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -195,10 +198,7 @@ export function RecipeGenerator() {
 
   return (
     <Card>
-        <CardHeader>
-            <CardTitle>Generate a New Recipe or Preservation Plan</CardTitle>
-        </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <form ref={formRef} action={handleFormAction} className="text-center">
             <div className='max-w-xl mx-auto'>
                 <div className="fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -317,7 +317,7 @@ export function RecipeGenerator() {
                       <Clock className="h-8 w-8 text-sky-500" />
                       <div>
                           <p className="font-bold text-lg">{preservationDays}</p>
-                          <p className="text-sm text-muted-foreground">Preservation Days</p>
+                          <p className="text-sm text-muted-foreground">Preservation Time</p>
                       </div>
                   </div>
                 )}

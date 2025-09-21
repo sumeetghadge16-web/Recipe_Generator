@@ -1,10 +1,10 @@
 'use server';
 /**
- * @fileOverview AI agent that generates a recipe from a list of ingredients.
+ * @fileOverview AI agent that generates a recipe or preservation plan from a list of ingredients.
  *
- * - generateRecipeFromIngredients - A function that generates a recipe from a list of ingredients.
- * - GenerateRecipeFromIngredientsInput - The input type for the generateRecipeFromIngredients function.
- * - GenerateRecipeFromIngredientsOutput - The return type for the generateRecipeFromingredients function.
+ * - generateRecipeFromIngredients - A function that handles the generation process.
+ * - GenerateRecipeFromIngredientsInput - The input type for the function.
+ * - GenerateRecipeFromIngredientsOutput - The return type for the function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -14,16 +14,21 @@ const GenerateRecipeFromIngredientsInputSchema = z.object({
   ingredients: z
     .string()
     .optional()
-    .describe('A comma-separated list of ingredients to use in the recipe.'),
+    .describe('A comma-separated list of ingredients to use.'),
   allergies: z
     .string()
     .optional()
-    .describe('A comma-separated list of allergies to avoid in the recipe.'),
+    .describe('A comma-separated list of allergies to avoid.'),
   photoDataUri: z
     .string()
     .optional()
     .describe(
       "An optional photo of the ingredients, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
+  choice: z
+    .enum(['recipe', 'preservation'])
+    .describe(
+      'The user\'s choice to either generate a recipe or a preservation plan.'
     ),
 });
 export type GenerateRecipeFromIngredientsInput = z.infer<
@@ -31,7 +36,7 @@ export type GenerateRecipeFromIngredientsInput = z.infer<
 >;
 
 const GenerateRecipeFromIngredientsOutputSchema = z.object({
-  recipe: z.string().describe('The generated recipe in markdown format.'),
+  content: z.string().describe('The generated content in markdown format.'),
   nutrition: z
     .object({
       calories: z.string().describe('Estimated calories per serving.'),
@@ -41,12 +46,23 @@ const GenerateRecipeFromIngredientsOutputSchema = z.object({
         .describe('Estimated protein content in grams per serving.'),
       sugar: z.string().describe('Estimated sugar content in grams per serving.'),
     })
-    .describe('Estimated nutritional information per serving.'),
+    .optional()
+    .describe('Estimated nutritional information per serving for recipes.'),
   healthAnalysis: z
     .string()
+    .optional()
     .describe(
-      'A brief, one-sentence analysis on whether the recipe is more suitable for weight loss, weight gain, or maintenance, based on its nutritional content.'
+      'A brief, one-sentence analysis on whether the recipe is more suitable for weight loss, weight gain, or maintenance.'
     ),
+  preservationDays: z
+    .string()
+    .optional()
+    .describe(
+      'An estimation of how many days the food can be preserved using the provided plan.'
+    ),
+  type: z
+    .enum(['recipe', 'preservation'])
+    .describe('The type of content generated.'),
 });
 export type GenerateRecipeFromIngredientsOutput = z.infer<
   typeof GenerateRecipeFromIngredientsOutputSchema
@@ -58,11 +74,11 @@ export async function generateRecipeFromIngredients(
   return generateRecipeFromIngredientsFlow(input);
 }
 
-const generateRecipePrompt = ai.definePrompt({
-  name: 'generateRecipePrompt',
+const generateContentPrompt = ai.definePrompt({
+  name: 'generateContentPrompt',
   input: {schema: GenerateRecipeFromIngredientsInputSchema},
   output: {schema: GenerateRecipeFromIngredientsOutputSchema},
-  prompt: `You are a world-class creative chef and recipe agent. Your mission is to create a delicious, practical, and easy-to-follow recipe.
+  prompt: `You are a world-class creative chef and food preservation expert. Your mission is to provide a helpful response based on the user's ingredients and their chosen goal.
 
 You will use the text description and, if provided, a photo of the ingredients as your primary sources of information. If a photo is provided, you MUST identify the ingredients in the photo and use them as the primary ingredients.
 
@@ -75,26 +91,48 @@ Photo of ingredients: {{media url=photoDataUri}}
 {{/if}}
 
 {{#if allergies}}
-**Allergy Alert:** The user is allergic to the following: {{{allergies}}}. You MUST NOT include any of these ingredients or their derivatives in the recipe.
+**Allergy Alert:** The user is allergic to the following: {{{allergies}}}. You MUST NOT include any of these ingredients or their derivatives in your response.
 {{/if}}
 
+**User's Goal:** The user wants to '{{choice}}'.
+
+---
+
+{{#if (eq choice "recipe")}}
+**Task: Generate a Recipe**
+
 **Rules:**
-1.  **Primary Ingredients:** You MUST use the ingredients provided by the user (identified from the photo and/or the text list). If a photo is present, prioritize the ingredients you identify in it.
-2.  **Pantry Staples:** You MAY suggest 1-3 common pantry staples (like salt, pepper, olive oil, water, flour, sugar, basic spices) if they are essential to make a complete dish. Clearly state these.
-3.  **No Exotic Ingredients:** Do not suggest any ingredients that are not on the user's list or are not common pantry staples.
-4.  **Structure:** The recipe must have a clear structure.
-5.  **Formatting:** Use Markdown for formatting.
-    - The recipe title should be a Level 2 Heading (##).
-    - Include a short, enticing one-paragraph description of the dish.
-    - Use a Level 3 Heading (###) for "Ingredients" and "Instructions".
+1.  **Primary Ingredients:** You MUST use the ingredients provided by the user.
+2.  **Pantry Staples:** You MAY suggest 1-3 common pantry staples (like salt, pepper, olive oil, water).
+3.  **No Exotic Ingredients:** Do not suggest any ingredients not on the user's list or common pantry staples.
+4.  **Formatting:** Use Markdown.
+    - Recipe title should be a Level 2 Heading (##).
+    - Include a short, enticing one-paragraph description.
+    - Use Level 3 Headings (###) for "Ingredients" and "Instructions".
     - List ingredients with bullet points (*).
     - List instructions with numbers (1., 2., 3.).
-    - Do NOT use bold formatting (e.g., **text**). Present all information like Prep time, Cook time, and Cuisine type as plain text.
-6.  **Creativity & Details:** Provide an estimated prep time and cook time. Suggest a suitable cuisine type (e.g., "Mediterranean," "Asian-inspired").
-7.  **Nutrition:** You must provide an estimated nutritional breakdown per serving for calories, fat, protein, and sugar.
-8.  **Health Analysis:** Based on the nutritional information, provide a brief, one-sentence analysis on whether the recipe is generally better for weight loss, weight gain, or weight maintenance.
+    - Provide estimated prep time and cook time.
+5.  **Nutrition:** Provide an estimated nutritional breakdown per serving for calories, fat, protein, and sugar.
+6.  **Health Analysis:** Provide a brief, one-sentence analysis on whether the recipe is better for weight loss, gain, or maintenance.
+7.  **Output Fields:** Set 'type' to 'recipe'. Fill the 'content', 'nutrition' and 'healthAnalysis' fields. 'preservationDays' should be null.
 
-Create a recipe based on the user's input.`,
+{{else if (eq choice "preservation")}}
+**Task: Create a Preservation Plan**
+
+**Rules:**
+1.  **Analyze Ingredients:** Identify the best preservation method for the provided ingredients (e.g., refrigeration, freezing, pickling, drying).
+2.  **Step-by-Step Guide:** Provide a simple, clear, step-by-step guide for each recommended preservation method.
+3.  **Storage Instructions:** Explain how and where to store the preserved food.
+4.  **Estimate Shelf Life:** Provide an estimated number of days the food will remain healthy and safe to eat (e.g., "3-5 days," "up to 6 months"). This is crucial.
+5.  **Formatting:** Use Markdown.
+    - The title should be a Level 2 Heading (##), like "## Preservation Plan for Your Ingredients".
+    - Use Level 3 Headings (###) for each ingredient or method (e.g., "### Freezing Berries," "### Refrigerating Leafy Greens").
+    - Use numbered lists for instructions.
+6.  **Output Fields:** Set 'type' to 'preservation'. Fill the 'content' and 'preservationDays' fields. 'nutrition' and 'healthAnalysis' should be null.
+
+{{/if}}
+
+Generate the content based on the user's choice.`,
 });
 
 const generateRecipeFromIngredientsFlow = ai.defineFlow(
@@ -104,7 +142,7 @@ const generateRecipeFromIngredientsFlow = ai.defineFlow(
     outputSchema: GenerateRecipeFromIngredientsOutputSchema,
   },
   async input => {
-    const {output} = await generateRecipePrompt(input);
+    const {output} = await generateContentPrompt(input);
     return output!;
   }
 );
