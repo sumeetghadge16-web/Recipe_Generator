@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Weight, Scale } from 'lucide-react';
+import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Scale } from 'lucide-react';
 import { Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from './ui/badge';
@@ -28,53 +28,53 @@ function SubmitButton() {
 }
 
 function markdownToHtml(markdown: string): string {
-  if (!markdown) return '';
-  
-  const lines = markdown.split('\n');
-  let html = '';
-  let inUl = false;
-  let inOl = false;
-
-  for (const line of lines) {
-    if (line.startsWith('## ')) {
-      if (inUl) { html += '</ul>'; inUl = false; }
-      if (inOl) { html += '</ol>'; inOl = false; }
-      html += `<h2>${line.substring(3)}</h2>`;
-      continue;
-    }
-    if (line.startsWith('### ')) {
-      if (inUl) { html += '</ul>'; inUl = false; }
-      if (inOl) { html += '</ol>'; inOl = false; }
-      html += `<h3>${line.substring(4)}</h3>`;
-      continue;
-    }
-    if (line.startsWith('* ')) {
-      if (inOl) { html += '</ol>'; inOl = false; }
-      if (!inUl) { html += '<ul>'; inUl = true; }
-      html += `<li>${line.substring(2)}</li>`;
-      continue;
-    }
-    if (line.match(/^\d+\. /)) {
-      if (inUl) { html += '</ul>'; inUl = false; }
-      if (!inOl) { html += '<ol>'; inOl = true; }
-      html += `<li>${line.replace(/^\d+\. /, '')}</li>`;
-      continue;
-    }
-
-    if (inUl && !line.startsWith('* ')) { html += '</ul>'; inUl = false; }
-    if (inOl && !line.match(/^\d+\. /)) { html += '</ol>'; inOl = false; }
+    if (!markdown) return '';
     
-    let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-    if (processedLine.trim()) {
-      html += `<p>${processedLine}</p>`;
+    const lines = markdown.split('\n');
+    let html = '';
+    let inUl = false;
+    let inOl = false;
+  
+    for (const line of lines) {
+      if (line.startsWith('## ')) {
+        if (inUl) { html += '</ul>'; inUl = false; }
+        if (inOl) { html += '</ol>'; inOl = false; }
+        html += `<h2 class="text-3xl font-bold mt-6 mb-4 text-center">${line.substring(3)}</h2>`;
+        continue;
+      }
+      if (line.startsWith('### ')) {
+        if (inUl) { html += '</ul>'; inUl = false; }
+        if (inOl) { html += '</ol>'; inOl = false; }
+        html += `<h3 class="text-2xl font-semibold mt-6 mb-3 border-b-2 border-primary pb-2">${line.substring(4)}</h3>`;
+        continue;
+      }
+      if (line.startsWith('* ')) {
+        if (inOl) { html += '</ol>'; inOl = false; }
+        if (!inUl) { html += '<ul class="list-disc pl-6 space-y-2">'; inUl = true; }
+        html += `<li class="text-base">${line.substring(2)}</li>`;
+        continue;
+      }
+      if (line.match(/^\d+\. /)) {
+        if (inUl) { html += '</ul>'; inUl = false; }
+        if (!inOl) { html += '<ol class="list-decimal pl-6 space-y-3">'; inOl = true; }
+        html += `<li class="text-base">${line.replace(/^\d+\. /, '')}</li>`;
+        continue;
+      }
+  
+      if (inUl && !line.startsWith('* ')) { html += '</ul>'; inUl = false; }
+      if (inOl && !line.match(/^\d+\. /)) { html += '</ol>'; inOl = false; }
+      
+      let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+      if (processedLine.trim()) {
+        html += `<p class="mb-4 text-base leading-relaxed">${processedLine}</p>`;
+      }
     }
-  }
-
-  if (inUl) html += '</ul>';
-  if (inOl) html += '</ul>';
-
-  return html;
+  
+    if (inUl) html += '</ul>';
+    if (inOl) html += '</ol>';
+  
+    return html;
 }
 
 export function RecipeGenerator() {
