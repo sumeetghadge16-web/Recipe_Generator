@@ -1,3 +1,16 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "recipe-hero",
+      "description": "A vibrant and healthy salad bowl, symbolizing fresh ingredients.",
+      "imageUrl": "https://picsum.photos/seed/recipe-hero/1080/256",
+      "imageHint": "food bowl"
+    },
+    {
+      "id": "background-food",
+      "description": "A vibrant and healthy food background",
+      "imageUrl": "https://picsum.photos/seed/background-food/1920/1080",
+      "imageHint": "food ingredients"
+    }
+  ]
 }
