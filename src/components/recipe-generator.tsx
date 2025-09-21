@@ -328,22 +328,22 @@ export function RecipeGenerator() {
                     </div>
                 )}
                 <div dangerouslySetInnerHTML={{ __html: markdownToHtml(currentContent) }} />
+                 <div className="flex justify-center mt-6">
+                  <Button
+                    type="button"
+                    onClick={handleSaveContent}
+                    variant="secondary"
+                    className="font-bold py-3 px-8 rounded-full hover:bg-secondary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  >
+                    Save Recipe
+                  </Button>
+                </div>
               </div>
             )}
         </div>
       </CardContent>
-      {currentContent && !pending && (
-        <CardFooter className="justify-center">
-            <Button
-              type="button"
-              onClick={handleSaveContent}
-              variant="secondary"
-              className="font-bold py-3 px-8 rounded-full hover:bg-secondary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
-            >
-              Save
-            </Button>
-        </CardFooter>
-      )}
     </Card>
   );
 }
+
+    
