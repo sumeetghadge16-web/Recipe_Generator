@@ -2,21 +2,33 @@
   "placeholderImages": [
     {
       "id": "recipe-hero",
-      "description": "A colorful assortment of fresh vegetables on a rustic background.",
-      "imageUrl": "https://picsum.photos/seed/fresh-veggies/1080/256",
-      "imageHint": "fresh vegetables"
+      "description": "A delicious salmon dish with asparagus.",
+      "imageUrl": "https://i.postimg.cc/WDcvVgfq/jonathan-borba-8l8Yl2ruUsg-unsplash.jpg",
+      "imageHint": "salmon dish"
     },
     {
       "id": "background-food",
-      "description": "A dark and moody shot of root vegetables.",
-      "imageUrl": "https://picsum.photos/seed/dark-veggies/1920/1080",
-      "imageHint": "dark vegetables"
+      "description": "A dark, moody shot of various cooking ingredients.",
+      "imageUrl": "https://storage.googleapis.com/studioprompt-images/34e0622a-8c50-4828-b8a9-4458f447702b/image.png",
+      "imageHint": "dark food ingredients"
     },
     {
       "id": "saved-recipes-hero",
-      "description": "A beautifully plated dish, ready to be served.",
-      "imageUrl": "https://picsum.photos/seed/plated-dish/1080/256",
-      "imageHint": "plated dish"
+      "description": "A beautifully composed salad in a bowl.",
+      "imageUrl": "https://storage.googleapis.com/studioprompt-images/34e0622a-8c50-4828-b8a9-4458f447702b/image.png",
+      "imageHint": "healthy salad bowl"
+    },
+    {
+      "id": "recipe-card-1",
+      "description": "A close-up of a delicious pasta dish.",
+      "imageUrl": "https://storage.googleapis.com/studioprompt-images/34e0622a-8c50-4828-b8a9-4458f447702b/image.png",
+      "imageHint": "pasta dish"
+    },
+    {
+      "id": "recipe-card-2",
+      "description": "A hearty and colorful vegetable soup.",
+      "imageUrl": "https://storage.googleapis.com/studioprompt-images/34e0622a-8c50-4828-b8a9-4458f447702b/image.png",
+      "imageHint": "vegetable soup"
     }
   ]
 }
