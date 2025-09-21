@@ -112,7 +112,6 @@ export function RecipeGenerator() {
         };
 
         recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-            console.error('Speech recognition error', event.error);
             let errorMessage = 'An unknown error occurred during speech recognition.';
             if (event.error === 'no-speech') {
               errorMessage = 'No speech was detected. Please try again.';
