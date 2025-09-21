@@ -85,7 +85,6 @@ function markdownToHtml(markdown: string): string {
 export function RecipeGenerator() {
   const [state, formAction] = useActionState(getRecipeAction, initialState);
   const { pending } = useFormStatus();
-  const [saveMessage, setSaveMessage] = useState('');
   const [ingredients, setIngredients] = useState('');
   const [allergies, setAllergies] = useState('');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -93,16 +92,10 @@ export function RecipeGenerator() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
-  const currentRecipe = useMemo(() => state.result?.recipe, [state.result, state.timestamp]);
-  const nutrition = useMemo(() => state.result?.nutrition, [state.result, state.timestamp]);
-  const healthAnalysis = useMemo(() => state.result?.healthAnalysis, [state.result, state.timestamp]);
+  const currentRecipe = useMemo(() => state.result?.recipe, [state.timestamp]);
+  const nutrition = useMemo(() => state.result?.nutrition, [state.timestamp]);
+  const healthAnalysis = useMemo(() => state.result?.healthAnalysis, [state.timestamp]);
   const formRef = useRef<HTMLFormElement>(null);
-
-  useEffect(() => {
-    if (state.result) {
-      setSaveMessage('');
-    }
-  }, [state.timestamp, state.result]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -291,10 +284,6 @@ export function RecipeGenerator() {
             </Alert>
             )}
             
-            {saveMessage && (
-                <p className="text-center text-green-600 font-medium mt-4 animate-in fade-in">{saveMessage}</p>
-            )}
-
             {currentRecipe && !pending && (
               <div className="prose prose-lg max-w-none bg-card/80 p-6 mt-4 rounded-lg border animate-in fade-in-up duration-700">
                 {nutrition && (
