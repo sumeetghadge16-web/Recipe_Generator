@@ -7,9 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Flame, Droplet, Beef, Wheat } from 'lucide-react';
+import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Weight, Scale } from 'lucide-react';
 import { Terminal } from 'lucide-react';
 import Link from 'next/link';
+import { Badge } from './ui/badge';
 
 const initialState = {
   result: undefined,
@@ -83,6 +84,7 @@ export function RecipeGenerator() {
   
   const currentRecipe = useMemo(() => state.result?.recipe, [state.result]);
   const nutrition = useMemo(() => state.result?.nutrition, [state.result]);
+  const healthAnalysis = useMemo(() => state.result?.healthAnalysis, [state.result]);
 
   useEffect(() => {
     if (state.result) {
@@ -112,6 +114,38 @@ export function RecipeGenerator() {
       }
     }
   };
+
+  const HealthAnalysisBadge = () => {
+    if (!healthAnalysis) return null;
+
+    const analysis = healthAnalysis.toLowerCase();
+    let icon: React.ReactNode;
+    let variant: 'default' | 'secondary' | 'destructive' = 'secondary';
+    let text = "Maintenance";
+
+    if (analysis.includes('loss')) {
+        icon = <TrendingDown className="h-4 w-4" />;
+        variant = 'default';
+        text = 'Weight Loss';
+    } else if (analysis.includes('gain')) {
+        icon = <TrendingUp className="h-4 w-4" />;
+        variant = 'destructive';
+        text = 'Weight Gain';
+    } else {
+        icon = <Scale className="h-4 w-4" />;
+        variant = 'secondary';
+    }
+
+    return (
+        <div className="flex flex-col items-center gap-2">
+            <Badge variant={variant} className="flex gap-2 items-center text-sm p-2 rounded-md">
+                {icon}
+                <span>{text}</span>
+            </Badge>
+            <p className="text-sm text-center text-muted-foreground">{healthAnalysis}</p>
+        </div>
+    );
+};
 
   return (
     <div>
@@ -188,6 +222,12 @@ export function RecipeGenerator() {
                   <p className="text-sm text-muted-foreground">Sugar</p>
                 </div>
               </div>
+            )}
+
+            {healthAnalysis && (
+                <div className="not-prose my-6 flex justify-center">
+                    <HealthAnalysisBadge />
+                </div>
             )}
             <div dangerouslySetInnerHTML={{ __html: markdownToHtml(currentRecipe) }} />
           </div>
