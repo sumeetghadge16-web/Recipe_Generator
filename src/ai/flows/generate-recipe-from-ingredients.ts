@@ -4,7 +4,7 @@
  *
  * - generateRecipeFromIngredients - A function that generates a recipe from a list of ingredients.
  * - GenerateRecipeFromIngredientsInput - The input type for the generateRecipeFromIngredients function.
- * - GenerateRecipeFromIngredientsOutput - The return type for the generateRecipeFromIngredients function.
+ * - GenerateRecipeFromIngredientsOutput - The return type for the generateRecipeFromingredients function.
  */
 
 import {ai} from '@/ai/genkit';
@@ -64,6 +64,7 @@ const generateRecipePrompt = ai.definePrompt({
     - Use a Level 3 Heading (###) for "Ingredients" and "Instructions".
     - List ingredients with bullet points (*).
     - List instructions with numbers (1., 2., 3.).
+    - Do NOT use bold formatting (e.g., **text**). Present all information like Prep time, Cook time, and Cuisine type as plain text.
 6.  **Creativity & Details:** Provide an estimated prep time and cook time. Suggest a suitable cuisine type (e.g., "Mediterranean," "Asian-inspired").
 7.  **Nutrition:** You must provide an estimated nutritional breakdown per serving for calories, fat, protein, and sugar.
 8.  **Health Analysis:** Based on the nutritional information, provide a brief, one-sentence analysis on whether the recipe is generally better for weight loss, weight gain, or weight maintenance.
