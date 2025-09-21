@@ -34,50 +34,27 @@ function SubmitButton({ pending }: { pending: boolean }) {
 function markdownToHtml(markdown: string): string {
     if (!markdown) return '';
     
-    const lines = markdown.split('\n');
-    let html = '';
-    let inUl = false;
-    let inOl = false;
-  
-    for (const line of lines) {
-      if (line.startsWith('## ')) {
-        if (inUl) { html += '</ul>'; inUl = false; }
-        if (inOl) { html += '</ol>'; inOl = false; }
-        html += `<h2 class="text-3xl font-bold mt-6 mb-4 text-center text-primary tracking-tight">${line.substring(3)}</h2>`;
-        continue;
-      }
-      if (line.startsWith('### ')) {
-        if (inUl) { html += '</ul>'; inUl = false; }
-        if (inOl) { html += '</ol>'; inOl = false; }
-        html += `<h3 class="text-2xl font-semibold mt-6 mb-3 border-b-2 border-primary/50 pb-2 text-primary/90">${line.substring(4)}</h3>`;
-        continue;
-      }
-      if (line.startsWith('* ')) {
-        if (inOl) { html += '</ol>'; inOl = false; }
-        if (!inUl) { html += '<ul class="list-disc pl-6 space-y-2 text-foreground/90">'; inUl = true; }
-        html += `<li class="text-base">${line.substring(2)}</li>`;
-        continue;
-      }
-      if (line.match(/^\d+\. /)) {
-        if (inUl) { html += '</ul>'; inUl = false; }
-        if (!inOl) { html += '<ol class="list-decimal pl-6 space-y-3 text-foreground/90">'; inOl = true; }
-        html += `<li class="text-base">${line.replace(/^\d+\. /, '')}</li>`;
-        continue;
-      }
-  
-      if (inUl && !line.startsWith('* ')) { html += '</ul>'; inUl = false; }
-      if (inOl && !line.match(/^\d+\. /)) { html += '</ol>'; inOl = false; }
-      
-      let processedLine = line;
-  
-      if (processedLine.trim()) {
-        html += `<p class="mb-4 text-base leading-relaxed text-foreground/80">${processedLine}</p>`;
-      }
-    }
-  
-    if (inUl) html += '</ul>';
-    if (inOl) html += '</ol>';
-  
+    let html = markdown
+      // Bold
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      // H2
+      .replace(/^## (.*$)/gim, '<h2 class="text-3xl font-bold mt-6 mb-4 text-center text-primary tracking-tight">$1</h2>')
+      // H3
+      .replace(/^### (.*$)/gim, '<h3 class="text-2xl font-semibold mt-6 mb-3 border-b-2 border-primary/50 pb-2 text-primary/90">$1</h3>')
+      // Lists
+      .replace(/^\s*\n\* (.*)/gm, (m, p1) => {
+          const items = m.split('\n').map(item => item.replace(/^\* /, '').trim()).filter(Boolean);
+          return '<ul class="list-disc pl-6 space-y-2 text-foreground/90">' + items.map(item => `<li class="text-base">${item}</li>`).join('') + '</ul>';
+      })
+      .replace(/^\s*\n\d+\. (.*)/gm, (m, p1) => {
+          const items = m.split('\n').map(item => item.replace(/^\d+\. /, '').trim()).filter(Boolean);
+          return '<ol class="list-decimal pl-6 space-y-3 text-foreground/90">' + items.map(item => `<li class="text-base">${item}</li>`).join('') + '</ol>';
+      })
+      // Paragraphs
+      .replace(/\n\n/g, '<br/>')
+      .replace(/^(?!<h[23]>|<ul>|<ol>|<li>)(.*)$/gim, '<p class="mb-4 text-base leading-relaxed text-foreground/80">$1</p>')
+      .replace(/<p><\/p>/g, ''); // Remove empty paragraphs
+
     return html;
 }
 
@@ -312,11 +289,11 @@ export function RecipeGenerator() {
             
             {currentContent && !isPending && (
               <div className="prose prose-lg max-w-none bg-card/80 p-6 mt-4 rounded-lg border animate-in fade-in-up duration-700">
-                <div className="flex justify-center -mt-12">
+                <div className="flex justify-center mb-6">
                   <Button
                     type="button"
                     onClick={handleSaveContent}
-                    className="font-bold py-3 px-8 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl -translate-y-4"
+                    className="font-bold py-3 px-8 rounded-full bg-accent text-accent-foreground hover:bg-accent/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
                   >
                     <Save className="mr-2 h-4 w-4" />
                     Save Recipe
@@ -349,7 +326,7 @@ export function RecipeGenerator() {
                 )}
                 
                 {healthAnalysis && (
-                    <div className="not-prose my-6 flex justify-center">
+                    <div className="not-prose my-8 flex justify-center">
                         <HealthAnalysisBadge />
                     </div>
                 )}
@@ -361,3 +338,5 @@ export function RecipeGenerator() {
     </Card>
   );
 }
+
+    
