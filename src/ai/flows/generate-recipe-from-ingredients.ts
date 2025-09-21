@@ -13,6 +13,7 @@ import {z} from 'genkit';
 const GenerateRecipeFromIngredientsInputSchema = z.object({
   ingredients: z
     .string()
+    .optional()
     .describe('A comma-separated list of ingredients to use in the recipe.'),
   allergies: z
     .string()
@@ -63,9 +64,12 @@ const generateRecipePrompt = ai.definePrompt({
   output: {schema: GenerateRecipeFromIngredientsOutputSchema},
   prompt: `You are a world-class creative chef and recipe agent. Your mission is to create a delicious, practical, and easy-to-follow recipe.
 
-You will use the text description and, if provided, a photo of the ingredients as your primary sources of information.
+You will use the text description and, if provided, a photo of the ingredients as your primary sources of information. If a photo is provided, you MUST identify the ingredients in the photo and use them as the primary ingredients.
 
+{{#if ingredients}}
 Text-described ingredients: {{{ingredients}}}
+{{/if}}
+
 {{#if photoDataUri}}
 Photo of ingredients: {{media url=photoDataUri}}
 {{/if}}
@@ -75,7 +79,7 @@ Photo of ingredients: {{media url=photoDataUri}}
 {{/if}}
 
 **Rules:**
-1.  **Primary Ingredients:** You MUST use the ingredients provided by the user (both from the text and identified in the photo).
+1.  **Primary Ingredients:** You MUST use the ingredients provided by the user (identified from the photo and/or the text list). If a photo is present, prioritize the ingredients you identify in it.
 2.  **Pantry Staples:** You MAY suggest 1-3 common pantry staples (like salt, pepper, olive oil, water, flour, sugar, basic spices) if they are essential to make a complete dish. Clearly state these.
 3.  **No Exotic Ingredients:** Do not suggest any ingredients that are not on the user's list or are not common pantry staples.
 4.  **Structure:** The recipe must have a clear structure.

@@ -17,8 +17,8 @@ export async function getRecipeAction(
   const allergies = formData.get('allergies') as string;
   const photoDataUri = formData.get('photoDataUri') as string | undefined;
 
-  if (!ingredients || ingredients.split(',').map(i => i.trim()).filter(Boolean).length < 2) {
-    return { error: 'Please enter at least two ingredients to generate a creative recipe.' };
+  if (!photoDataUri && (!ingredients || ingredients.trim().length === 0)) {
+    return { error: 'Please enter at least one ingredient or upload a photo to generate a recipe.' };
   }
 
   try {

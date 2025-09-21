@@ -186,7 +186,7 @@ export function RecipeGenerator() {
                     What ingredients do you have?
                 </Label>
                 <p className="text-muted-foreground mb-4">
-                    Enter a few items (e.g., "chicken breast, tomatoes, rice") and let the AI agent create a recipe for you!
+                    Type your ingredients below, or upload a photo to have the AI detect them for you.
                 </p>
                 <div className="flex gap-4">
                     <Textarea
@@ -194,10 +194,9 @@ export function RecipeGenerator() {
                     name="ingredients"
                     rows={4}
                     className="flex-grow p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
-                    placeholder="e.g., chicken, broccoli, garlic, lemon, olive oil..."
+                    placeholder="e.g., chicken, broccoli, garlic... (optional if uploading photo)"
                     value={ingredients}
                     onChange={(e) => setIngredients(e.target.value)}
-                    required
                     />
                      <div className="relative w-24 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-background hover:border-primary transition-colors flex-shrink-0">
                         <input
