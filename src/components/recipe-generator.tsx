@@ -1,13 +1,13 @@
 'use client';
 
-import { useActionState, useEffect, useState, useMemo, useRef } from 'react';
+import { useActionState, useEffect, useState, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import { getRecipeAction } from '@/app/actions';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Scale, Mic, MicOff } from 'lucide-react';
+import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Scale } from 'lucide-react';
 import { Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from './ui/badge';
@@ -83,8 +83,6 @@ export function RecipeGenerator() {
   const { pending } = useFormStatus();
   const [saveMessage, setSaveMessage] = useState('');
   const [ingredients, setIngredients] = useState('');
-  const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
   const { toast } = useToast();
   
   const currentRecipe = useMemo(() => state.result?.recipe, [state.result]);
@@ -96,71 +94,6 @@ export function RecipeGenerator() {
       setSaveMessage('');
     }
   }, [state.timestamp, state.result]);
-
-  useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-        recognitionRef.current = new SpeechRecognition();
-        const recognition = recognitionRef.current;
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = 'en-US';
-
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-            const transcript = event.results[0][0].transcript;
-            setIngredients(prev => prev ? `${prev}, ${transcript}` : transcript);
-        };
-
-        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-            let errorMessage = 'An unknown error occurred during speech recognition.';
-            if (event.error === 'no-speech') {
-              errorMessage = 'No speech was detected. Please try again.';
-            } else if (event.error === 'audio-capture') {
-              errorMessage = 'Audio capture failed. Please ensure your microphone is working.';
-            } else if (event.error === 'not-allowed') {
-              errorMessage = 'Microphone access denied. Please enable it in your browser settings.';
-            } else if (event.error === 'network') {
-              errorMessage = 'A network error occurred. Please check your internet connection and try again.';
-            }
-            toast({
-              variant: 'destructive',
-              title: 'Voice Input Error',
-              description: errorMessage,
-            });
-        };
-
-        recognition.onend = () => {
-            setIsListening(false);
-        };
-    }
-  }, [toast]);
-
-  const handleListen = () => {
-    const recognition = recognitionRef.current;
-    if (recognition) {
-        if (isListening) {
-            recognition.stop();
-        } else {
-            try {
-              recognition.start();
-              setIsListening(true);
-            } catch(e) {
-                console.error("Could not start recognition", e);
-                toast({
-                  variant: 'destructive',
-                  title: 'Voice Input Error',
-                  description: 'Could not start voice recognition. Please check your browser permissions.',
-                });
-            }
-        }
-    } else {
-        toast({
-            variant: 'destructive',
-            title: 'Unsupported Feature',
-            description: 'Your browser does not support voice recognition.',
-        });
-    }
-  };
 
   const handleSaveRecipe = () => {
     if (currentRecipe) {
@@ -231,22 +164,12 @@ export function RecipeGenerator() {
             id="ingredientsInput"
             name="ingredients"
             rows={4}
-            className="w-full p-3 pr-12 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
+            className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
             placeholder="e.g., chicken, broccoli, garlic, lemon, olive oil..."
             value={ingredients}
             onChange={(e) => setIngredients(e.target.value)}
             required
           />
-          <Button 
-            type="button" 
-            onClick={handleListen}
-            variant="ghost"
-            size="icon"
-            className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground hover:text-primary"
-            aria-label={isListening ? 'Stop listening' : 'Speak ingredients'}
-          >
-            {isListening ? <MicOff className="h-5 w-5 text-red-500" /> : <Mic className="h-5 w-5" />}
-          </Button>
         </div>
         <div className="flex justify-center items-center space-x-4 mt-5">
           <SubmitButton />
