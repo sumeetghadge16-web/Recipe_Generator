@@ -64,7 +64,6 @@ const generateRecipePrompt = ai.definePrompt({
     - Use a Level 3 Heading (###) for "Ingredients" and "Instructions".
     - List ingredients with bullet points (*).
     - List instructions with numbers (1., 2., 3.).
-    - Use **double asterisks** for bolding (e.g., **Cook the Rice:**).
 6.  **Creativity & Details:** Provide an estimated prep time and cook time. Suggest a suitable cuisine type (e.g., "Mediterranean," "Asian-inspired").
 7.  **Nutrition:** You must provide an estimated nutritional breakdown per serving for calories, fat, protein, and sugar.
 8.  **Health Analysis:** Based on the nutritional information, provide a brief, one-sentence analysis on whether the recipe is generally better for weight loss, weight gain, or weight maintenance.
