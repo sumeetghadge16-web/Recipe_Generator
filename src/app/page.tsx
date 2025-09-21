@@ -1,14 +1,19 @@
+
+'use client';
+
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { RecipeGenerator } from '@/components/recipe-generator';
+import { SavedRecipes } from '@/components/saved-recipes';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function Home() {
   const bgImage = PlaceHolderImages.find(img => img.id === 'chef-mascot');
 
   return (
-    <main className="relative overflow-hidden">
+    <main className="relative overflow-hidden min-h-screen">
       {bgImage && (
-        <div className="absolute inset-0 w-full min-h-screen">
+        <div className="absolute inset-0 w-full h-full">
           <Image
             src={bgImage.imageUrl}
             alt={bgImage.description}
@@ -30,7 +35,18 @@ export default function Home() {
         </header>
 
         <section className="bg-card/80 backdrop-blur-md rounded-2xl shadow-xl p-6 md:p-8 border animate-in fade-in zoom-in-95 duration-500">
-          <RecipeGenerator />
+          <Tabs defaultValue="generate">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="generate">Generate Recipe</TabsTrigger>
+              <TabsTrigger value="saved">My Saved Recipes</TabsTrigger>
+            </TabsList>
+            <TabsContent value="generate">
+                <RecipeGenerator />
+            </TabsContent>
+            <TabsContent value="saved">
+                <SavedRecipes />
+            </TabsContent>
+          </Tabs>
         </section>
       </div>
     </main>

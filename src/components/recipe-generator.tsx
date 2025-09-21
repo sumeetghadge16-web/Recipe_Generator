@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useActionState, useEffect, useState, useMemo, useRef } from 'react';
@@ -10,14 +11,15 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Scale, Upload, X } from 'lucide-react';
 import { Terminal } from 'lucide-react';
-import Link from 'next/link';
 import { Badge } from './ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Input } from './ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 
 const initialState = {
   result: undefined,
   error: undefined,
+  timestamp: Date.now(),
 };
 
 function SubmitButton() {
@@ -91,15 +93,23 @@ export function RecipeGenerator() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
-  const currentRecipe = useMemo(() => state.result?.recipe, [state.result]);
-  const nutrition = useMemo(() => state.result?.nutrition, [state.result]);
-  const healthAnalysis = useMemo(() => state.result?.healthAnalysis, [state.result]);
+  const currentRecipe = useMemo(() => state.result?.recipe, [state.result, state.timestamp]);
+  const nutrition = useMemo(() => state.result?.nutrition, [state.result, state.timestamp]);
+  const healthAnalysis = useMemo(() => state.result?.healthAnalysis, [state.result, state.timestamp]);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     if (state.result) {
       setSaveMessage('');
     }
   }, [state.timestamp, state.result]);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      formRef.current?.requestSubmit();
+    }
+  };
   
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -129,18 +139,29 @@ export function RecipeGenerator() {
         const recipeTitleMatch = currentRecipe.match(/^##\s*(.*)$/m);
         const title = recipeTitleMatch ? recipeTitleMatch[1].trim() : "Untitled Recipe";
 
-        const isDuplicate = savedRecipes.some(recipe => recipe.content === currentRecipe);
+        const isDuplicate = savedRecipes.some(recipe => recipe.title === title && recipe.content === currentRecipe);
 
         if (!isDuplicate) {
           savedRecipes.push({ title: title, content: currentRecipe, savedAt: new Date().toISOString() });
           localStorage.setItem('savedRecipes', JSON.stringify(savedRecipes));
-          setSaveMessage(`"${title}" saved successfully!`);
+          toast({
+            title: "Recipe Saved!",
+            description: `"${title}" has been saved successfully.`,
+          });
         } else {
-          setSaveMessage('This recipe is already saved!');
+          toast({
+            variant: "destructive",
+            title: "Already Saved",
+            description: "This recipe is already in your saved list.",
+          });
         }
       } catch (error) {
         console.error("Could not save recipe:", error);
-        setSaveMessage('Failed to save recipe.');
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to save recipe.",
+        });
       }
     }
   };
@@ -178,80 +199,141 @@ export function RecipeGenerator() {
 };
 
   return (
-    <div>
-      <form action={formAction} className="text-center">
-        <div className='max-w-xl mx-auto'>
-            <div className="fade-in-up" style={{ animationDelay: '0.2s' }}>
-                <Label htmlFor="ingredientsInput" className="block text-xl font-semibold text-foreground mb-2">
-                    What ingredients do you have?
-                </Label>
-                <p className="text-muted-foreground mb-4">
-                    Type your ingredients below, or upload a photo for the AI to detect them.
-                </p>
-                <div className="flex gap-4">
-                    <Textarea
-                    id="ingredientsInput"
-                    name="ingredients"
-                    rows={4}
-                    className="flex-grow p-3 border-border rounded-lg focus:ring-2 focus:ring-primary transition-shadow bg-background/70"
-                    placeholder="e.g., chicken, broccoli, garlic... (optional if uploading photo)"
-                    value={ingredients}
-                    onChange={(e) => setIngredients(e.target.value)}
-                    />
-                     <div className="relative w-24 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-background/70 hover:border-primary transition-colors flex-shrink-0">
-                        <input
-                            type="file"
-                            id="photoInput"
-                            ref={fileInputRef}
-                            onChange={handlePhotoChange}
-                            accept="image/*"
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+    <Card>
+        <CardHeader>
+            <CardTitle>Generate a New Recipe</CardTitle>
+        </CardHeader>
+      <CardContent>
+        <form ref={formRef} action={formAction} className="text-center">
+            <div className='max-w-xl mx-auto'>
+                <div className="fade-in-up" style={{ animationDelay: '0.2s' }}>
+                    <Label htmlFor="ingredientsInput" className="block text-xl font-semibold text-foreground mb-2">
+                        What ingredients do you have?
+                    </Label>
+                    <p className="text-muted-foreground mb-4">
+                        Type your ingredients and press Enter, or upload a photo.
+                    </p>
+                    <div className="flex gap-4">
+                        <Textarea
+                        id="ingredientsInput"
+                        name="ingredients"
+                        rows={4}
+                        className="flex-grow p-3 border-border rounded-lg focus:ring-2 focus:ring-primary transition-shadow bg-background/70"
+                        placeholder="e.g., chicken, broccoli, garlic..."
+                        value={ingredients}
+                        onChange={(e) => setIngredients(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         />
-                        {photoPreview ? (
-                            <>
-                                <Image src={photoPreview} alt="Ingredients preview" layout="fill" objectFit="contain" className="rounded-lg p-1 animate-in fade-in zoom-in-95" />
-                                <Button
-                                    type="button"
-                                    variant="destructive"
-                                    size="icon"
-                                    className="absolute top-1 right-1 h-5 w-5 z-10"
-                                    onClick={handleRemovePhoto}
-                                >
-                                    <X className="h-3 w-3" />
-                                </Button>
-                            </>
-                        ) : (
-                            <div className="text-center text-muted-foreground p-1">
-                                <Upload className="mx-auto h-6 w-6" />
-                                <p className="text-xs mt-1">Upload</p>
-                            </div>
-                        )}
+                         <div className="relative w-24 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-background/70 hover:border-primary transition-colors flex-shrink-0">
+                            <input
+                                type="file"
+                                id="photoInput"
+                                ref={fileInputRef}
+                                onChange={handlePhotoChange}
+                                accept="image/*"
+                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            />
+                            {photoPreview ? (
+                                <>
+                                    <Image src={photoPreview} alt="Ingredients preview" layout="fill" objectFit="contain" className="rounded-lg p-1 animate-in fade-in zoom-in-95" />
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute top-1 right-1 h-5 w-5 z-10"
+                                        onClick={handleRemovePhoto}
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </>
+                            ) : (
+                                <div className="text-center text-muted-foreground p-1">
+                                    <Upload className="mx-auto h-6 w-6" />
+                                    <p className="text-xs mt-1">Upload</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+                 <input type="hidden" name="photoDataUri" value={photoDataUri || ''} />
+                <div className="fade-in-up" style={{ animationDelay: '0.4s' }}>
+                    <Label htmlFor="allergiesInput" className="block text-xl font-semibold text-foreground mt-6 mb-2">
+                        Any allergies? <span className="text-sm text-muted-foreground">(Optional)</span>
+                    </Label>
+                    <p className="text-muted-foreground mb-4">
+                        List any allergies to exclude from the recipe.
+                    </p>
+                    <div className="relative w-full">
+                        <Input
+                            id="allergiesInput"
+                            name="allergies"
+                            className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-primary transition-shadow bg-background/70"
+                            placeholder="e.g., gluten, nuts, dairy..."
+                            value={allergies}
+                            onChange={(e) => setAllergies(e.target.value)}
+                        />
                     </div>
                 </div>
             </div>
-             <input type="hidden" name="photoDataUri" value={photoDataUri || ''} />
-            <div className="fade-in-up" style={{ animationDelay: '0.4s' }}>
-                <Label htmlFor="allergiesInput" className="block text-xl font-semibold text-foreground mt-6 mb-2">
-                    Any allergies? <span className="text-sm text-muted-foreground">(Optional)</span>
-                </Label>
-                <p className="text-muted-foreground mb-4">
-                    List any allergies to exclude from the recipe.
-                </p>
-                <div className="relative w-full">
-                    <Input
-                        id="allergiesInput"
-                        name="allergies"
-                        className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-primary transition-shadow bg-background/70"
-                        placeholder="e.g., gluten, nuts, dairy..."
-                        value={allergies}
-                        onChange={(e) => setAllergies(e.target.value)}
-                    />
-                </div>
+            <div className="flex justify-center items-center flex-wrap gap-4 mt-6 fade-in-up" style={{ animationDelay: '0.6s' }}>
+              <SubmitButton />
             </div>
+        </form>
+
+        <div className="mt-8">
+            {pending && <div className="mx-auto loader"></div>}
+
+            {state.error && !pending && (
+            <Alert variant="destructive" className="animate-in fade-in">
+                <Terminal className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
+            )}
+            
+            {saveMessage && (
+                <p className="text-center text-green-600 font-medium mt-4 animate-in fade-in">{saveMessage}</p>
+            )}
+
+            {currentRecipe && !pending && (
+              <div className="prose prose-lg max-w-none bg-card/80 p-6 mt-4 rounded-lg border animate-in fade-in-up duration-700">
+                {nutrition && (
+                  <div className="not-prose flex flex-wrap justify-around items-center mb-6 p-4 bg-muted/50 rounded-lg">
+                    <div className="text-center p-2">
+                      <Flame className="mx-auto h-8 w-8 text-red-500" />
+                      <p className="font-bold text-lg">{nutrition.calories}</p>
+                      <p className="text-sm text-muted-foreground">Calories</p>
+                    </div>
+                    <div className="text-center p-2">
+                      <Droplet className="mx-auto h-8 w-8 text-yellow-500" />
+                      <p className="font-bold text-lg">{nutrition.fat}</p>
+                      <p className="text-sm text-muted-foreground">Fat</p>
+                    </div>
+                    <div className="text-center p-2">
+                      <Beef className="mx-auto h-8 w-8 text-sky-500" />
+                      <p className="font-bold text-lg">{nutrition.protein}</p>
+                      <p className="text-sm text-muted-foreground">Protein</p>
+                    </div>
+                    <div className="text-center p-2">
+                      <Wheat className="mx-auto h-8 w-8 text-amber-600" />
+                      <p className="font-bold text-lg">{nutrition.sugar}</p>
+                      <p className="text-sm text-muted-foreground">Sugar</p>
+                    </div>
+                  </div>
+                )}
+
+                {healthAnalysis && (
+                    <div className="not-prose my-6 flex justify-center">
+                        <HealthAnalysisBadge />
+                    </div>
+                )}
+                <div dangerouslySetInnerHTML={{ __html: markdownToHtml(currentRecipe) }} />
+              </div>
+            )}
         </div>
-        <div className="flex justify-center items-center flex-wrap gap-4 mt-6 fade-in-up" style={{ animationDelay: '0.6s' }}>
-          <SubmitButton />
-          {currentRecipe && !pending && (
+      </CardContent>
+      {currentRecipe && !pending && (
+        <CardFooter className="justify-center">
             <Button
               type="button"
               onClick={handleSaveRecipe}
@@ -260,64 +342,8 @@ export function RecipeGenerator() {
             >
               Save Recipe
             </Button>
-          )}
-           <Link href="/saved-recipes" passHref>
-                <Button variant="outline" className="font-bold py-3 px-8 rounded-full hover:bg-accent/10 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">My Saved Recipes</Button>
-            </Link>
-        </div>
-      </form>
-
-      <div className="mt-8">
-        {pending && <div className="mx-auto loader"></div>}
-
-        {state.error && !pending && (
-          <Alert variant="destructive" className="animate-in fade-in">
-            <Terminal className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{state.error}</AlertDescription>
-          </Alert>
-        )}
-        
-        {saveMessage && (
-            <p className="text-center text-green-600 font-medium mt-4 animate-in fade-in">{saveMessage}</p>
-        )}
-
-        {currentRecipe && !pending && (
-          <div className="prose prose-lg max-w-none bg-card/80 p-6 mt-4 rounded-lg border animate-in fade-in-up duration-700">
-            {nutrition && (
-              <div className="not-prose flex flex-wrap justify-around items-center mb-6 p-4 bg-muted/50 rounded-lg">
-                <div className="text-center p-2">
-                  <Flame className="mx-auto h-8 w-8 text-red-500" />
-                  <p className="font-bold text-lg">{nutrition.calories}</p>
-                  <p className="text-sm text-muted-foreground">Calories</p>
-                </div>
-                <div className="text-center p-2">
-                  <Droplet className="mx-auto h-8 w-8 text-yellow-500" />
-                  <p className="font-bold text-lg">{nutrition.fat}</p>
-                  <p className="text-sm text-muted-foreground">Fat</p>
-                </div>
-                <div className="text-center p-2">
-                  <Beef className="mx-auto h-8 w-8 text-sky-500" />
-                  <p className="font-bold text-lg">{nutrition.protein}</p>
-                  <p className="text-sm text-muted-foreground">Protein</p>
-                </div>
-                <div className="text-center p-2">
-                  <Wheat className="mx-auto h-8 w-8 text-amber-600" />
-                  <p className="font-bold text-lg">{nutrition.sugar}</p>
-                  <p className="text-sm text-muted-foreground">Sugar</p>
-                </div>
-              </div>
-            )}
-
-            {healthAnalysis && (
-                <div className="not-prose my-6 flex justify-center">
-                    <HealthAnalysisBadge />
-                </div>
-            )}
-            <div dangerouslySetInnerHTML={{ __html: markdownToHtml(currentRecipe) }} />
-          </div>
-        )}
-      </div>
-    </div>
+        </CardFooter>
+      )}
+    </Card>
   );
 }
