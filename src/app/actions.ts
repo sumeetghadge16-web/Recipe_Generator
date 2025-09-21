@@ -1,10 +1,10 @@
 
 'use server';
 
-import { generateRecipeFromIngredients } from '@/ai/flows/generate-recipe-from-ingredients';
+import { GenerateRecipeFromIngredientsOutput, generateRecipeFromIngredients } from '@/ai/flows/generate-recipe-from-ingredients';
 
 interface GenerateRecipeState {
-  recipeMarkdown?: string;
+  result?: GenerateRecipeFromIngredientsOutput;
   error?: string;
   timestamp?: number;
 }
@@ -21,7 +21,7 @@ export async function getRecipeAction(
 
   try {
     const result = await generateRecipeFromIngredients({ ingredients });
-    return { recipeMarkdown: result.recipe, timestamp: Date.now() };
+    return { result, timestamp: Date.now() };
   } catch (e) {
     console.error(e);
     return { error: 'Sorry, something went wrong while creating your recipe. Please check your connection and try again.' };

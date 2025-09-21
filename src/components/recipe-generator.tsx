@@ -1,17 +1,18 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useState, useMemo } from 'react';
 import { useFormStatus } from 'react-dom';
 import { getRecipeAction } from '@/app/actions';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Flame, Droplet, Beef, Wheat } from 'lucide-react';
 import { Terminal } from 'lucide-react';
 import Link from 'next/link';
 
 const initialState = {
-  recipeMarkdown: undefined,
+  result: undefined,
   error: undefined,
 };
 
@@ -70,7 +71,7 @@ function markdownToHtml(markdown: string): string {
   }
 
   if (inUl) html += '</ul>';
-  if (inOl) html += '</ol>';
+  if (inOl) html += '</ul>';
 
   return html;
 }
@@ -79,14 +80,15 @@ export function RecipeGenerator() {
   const [state, formAction] = useActionState(getRecipeAction, initialState);
   const { pending } = useFormStatus();
   const [saveMessage, setSaveMessage] = useState('');
-  const [currentRecipe, setCurrentRecipe] = useState<string | undefined>();
+  
+  const currentRecipe = useMemo(() => state.result?.recipe, [state.result]);
+  const nutrition = useMemo(() => state.result?.nutrition, [state.result]);
 
   useEffect(() => {
-    if (state.recipeMarkdown) {
-      setCurrentRecipe(state.recipeMarkdown);
+    if (state.result) {
       setSaveMessage(''); // Reset save message when new recipe is generated
     }
-  }, [state.timestamp, state.recipeMarkdown]);
+  }, [state.timestamp, state.result]);
 
   const handleSaveRecipe = () => {
     if (currentRecipe) {
@@ -163,6 +165,30 @@ export function RecipeGenerator() {
 
         {currentRecipe && !pending && (
           <div className="prose prose-lg max-w-none bg-background/70 p-6 mt-4 rounded-lg border border-border">
+            {nutrition && (
+              <div className="not-prose flex justify-around items-center mb-6 p-4 bg-muted/50 rounded-lg">
+                <div className="text-center">
+                  <Flame className="mx-auto h-8 w-8 text-red-500" />
+                  <p className="font-bold text-lg">{nutrition.calories}</p>
+                  <p className="text-sm text-muted-foreground">Calories</p>
+                </div>
+                <div className="text-center">
+                  <Droplet className="mx-auto h-8 w-8 text-yellow-500" />
+                  <p className="font-bold text-lg">{nutrition.fat}</p>
+                  <p className="text-sm text-muted-foreground">Fat</p>
+                </div>
+                <div className="text-center">
+                  <Beef className="mx-auto h-8 w-8 text-blue-500" />
+                  <p className="font-bold text-lg">{nutrition.protein}</p>
+                  <p className="text-sm text-muted-foreground">Protein</p>
+                </div>
+                <div className="text-center">
+                  <Wheat className="mx-auto h-8 w-8 text-purple-500" />
+                  <p className="font-bold text-lg">{nutrition.sugar}</p>
+                  <p className="text-sm text-muted-foreground">Sugar</p>
+                </div>
+              </div>
+            )}
             <div dangerouslySetInnerHTML={{ __html: markdownToHtml(currentRecipe) }} />
           </div>
         )}

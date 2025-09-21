@@ -21,6 +21,12 @@ export type GenerateRecipeFromIngredientsInput = z.infer<
 
 const GenerateRecipeFromIngredientsOutputSchema = z.object({
   recipe: z.string().describe('The generated recipe in markdown format.'),
+  nutrition: z.object({
+    calories: z.string().describe('Estimated calories per serving.'),
+    fat: z.string().describe('Estimated fat content in grams per serving.'),
+    protein: z.string().describe('Estimated protein content in grams per serving.'),
+    sugar: z.string().describe('Estimated sugar content in grams per serving.'),
+  }).describe('Estimated nutritional information per serving.'),
 });
 export type GenerateRecipeFromIngredientsOutput = z.infer<
   typeof GenerateRecipeFromIngredientsOutputSchema
@@ -46,11 +52,12 @@ const generateRecipePrompt = ai.definePrompt({
 5.  **Formatting:** Use Markdown for formatting.
     - The recipe title should be a Level 2 Heading (##).
     - Include a short, enticing one-paragraph description of the dish.
-    - Use a Level 3 Heading (###) for \"Ingredients\" and \"Instructions\".
+    - Use a Level 3 Heading (###) for "Ingredients" and "Instructions".
     - List ingredients with bullet points (*).
     - List instructions with numbers (1., 2., 3.).
     - Use **double asterisks** for bolding (e.g., **Cook the Rice:**).
-6.  **Creativity & Details:** Provide an estimated prep time and cook time. Suggest a suitable cuisine type (e.g., \"Mediterranean,\" \"Asian-inspired\").
+6.  **Creativity & Details:** Provide an estimated prep time and cook time. Suggest a suitable cuisine type (e.g., "Mediterranean," "Asian-inspired").
+7.  **Nutrition:** You must provide an estimated nutritional breakdown per serving for calories, fat, protein, and sugar.
 
 Create a recipe based on the user's input.`,
 });
