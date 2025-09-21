@@ -29,6 +29,12 @@
       "description": "A hearty and colorful vegetable soup.",
       "imageUrl": "https://storage.googleapis.com/studioprompt-images/34e0622a-8c50-4828-b8a9-4458f447702b/image.png",
       "imageHint": "vegetable soup"
+    },
+    {
+      "id": "chef-mascot",
+      "description": "A friendly cartoon chef mascot in a kitchen environment.",
+      "imageUrl": "https://i.postimg.cc/zX2J4Vz8/ai-chef-mascot.png",
+      "imageHint": "cartoon chef"
     }
   ]
 }

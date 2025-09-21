@@ -24,7 +24,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button type="submit" disabled={pending} className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-full hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg disabled:bg-gray-400 disabled:scale-100 disabled:cursor-not-allowed">
+    <Button type="submit" disabled={pending} className="bg-primary text-primary-foreground font-bold py-3 px-8 rounded-full hover:bg-primary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl disabled:bg-gray-400 disabled:scale-100 disabled:cursor-not-allowed">
       {pending ? 'Generating...' : 'Generate Recipe'}
     </Button>
   );
@@ -42,13 +42,13 @@ function markdownToHtml(markdown: string): string {
       if (line.startsWith('## ')) {
         if (inUl) { html += '</ul>'; inUl = false; }
         if (inOl) { html += '</ol>'; inOl = false; }
-        html += `<h2 class="text-3xl font-bold mt-6 mb-4 text-center text-primary">${line.substring(3)}</h2>`;
+        html += `<h2 class="text-3xl font-bold mt-6 mb-4 text-center text-primary tracking-tight">${line.substring(3)}</h2>`;
         continue;
       }
       if (line.startsWith('### ')) {
         if (inUl) { html += '</ul>'; inUl = false; }
         if (inOl) { html += '</ol>'; inOl = false; }
-        html += `<h3 class="text-2xl font-semibold mt-6 mb-3 border-b-2 border-primary pb-2 text-primary/90">${line.substring(4)}</h3>`;
+        html += `<h3 class="text-2xl font-semibold mt-6 mb-3 border-b-2 border-primary/50 pb-2 text-primary/90">${line.substring(4)}</h3>`;
         continue;
       }
       if (line.startsWith('* ')) {
@@ -168,7 +168,7 @@ export function RecipeGenerator() {
 
     return (
         <div className="flex flex-col items-center gap-2">
-            <Badge variant={variant} className="flex gap-2 items-center text-sm p-2 rounded-md">
+            <Badge variant={variant} className="flex gap-2 items-center text-sm p-2 rounded-md shadow-sm">
                 {icon}
                 <span>{text}</span>
             </Badge>
@@ -181,24 +181,24 @@ export function RecipeGenerator() {
     <div>
       <form action={formAction} className="text-center">
         <div className='max-w-xl mx-auto'>
-            <div>
+            <div className="fade-in-up" style={{ animationDelay: '0.2s' }}>
                 <Label htmlFor="ingredientsInput" className="block text-xl font-semibold text-foreground mb-2">
                     What ingredients do you have?
                 </Label>
                 <p className="text-muted-foreground mb-4">
-                    Type your ingredients below, or upload a photo to have the AI detect them for you.
+                    Type your ingredients below, or upload a photo for the AI to detect them.
                 </p>
                 <div className="flex gap-4">
                     <Textarea
                     id="ingredientsInput"
                     name="ingredients"
                     rows={4}
-                    className="flex-grow p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
+                    className="flex-grow p-3 border-border rounded-lg focus:ring-2 focus:ring-primary transition-shadow bg-background/70"
                     placeholder="e.g., chicken, broccoli, garlic... (optional if uploading photo)"
                     value={ingredients}
                     onChange={(e) => setIngredients(e.target.value)}
                     />
-                     <div className="relative w-24 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-background hover:border-primary transition-colors flex-shrink-0">
+                     <div className="relative w-24 h-24 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-background/70 hover:border-primary transition-colors flex-shrink-0">
                         <input
                             type="file"
                             id="photoInput"
@@ -209,7 +209,7 @@ export function RecipeGenerator() {
                         />
                         {photoPreview ? (
                             <>
-                                <Image src={photoPreview} alt="Ingredients preview" layout="fill" objectFit="contain" className="rounded-lg p-1" />
+                                <Image src={photoPreview} alt="Ingredients preview" layout="fill" objectFit="contain" className="rounded-lg p-1 animate-in fade-in zoom-in-95" />
                                 <Button
                                     type="button"
                                     variant="destructive"
@@ -230,37 +230,39 @@ export function RecipeGenerator() {
                 </div>
             </div>
              <input type="hidden" name="photoDataUri" value={photoDataUri || ''} />
-            <Label htmlFor="allergiesInput" className="block text-xl font-semibold text-foreground mt-6 mb-2">
-                Any allergies? <span className="text-sm text-muted-foreground">(Optional)</span>
-            </Label>
-            <p className="text-muted-foreground mb-4">
-                List any allergies to exclude from the recipe.
-            </p>
-            <div className="relative w-full">
-                <Input
-                    id="allergiesInput"
-                    name="allergies"
-                    className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
-                    placeholder="e.g., gluten, nuts, dairy..."
-                    value={allergies}
-                    onChange={(e) => setAllergies(e.target.value)}
-                />
+            <div className="fade-in-up" style={{ animationDelay: '0.4s' }}>
+                <Label htmlFor="allergiesInput" className="block text-xl font-semibold text-foreground mt-6 mb-2">
+                    Any allergies? <span className="text-sm text-muted-foreground">(Optional)</span>
+                </Label>
+                <p className="text-muted-foreground mb-4">
+                    List any allergies to exclude from the recipe.
+                </p>
+                <div className="relative w-full">
+                    <Input
+                        id="allergiesInput"
+                        name="allergies"
+                        className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-primary transition-shadow bg-background/70"
+                        placeholder="e.g., gluten, nuts, dairy..."
+                        value={allergies}
+                        onChange={(e) => setAllergies(e.target.value)}
+                    />
+                </div>
             </div>
         </div>
-        <div className="flex justify-center items-center space-x-4 mt-5">
+        <div className="flex justify-center items-center flex-wrap gap-4 mt-6 fade-in-up" style={{ animationDelay: '0.6s' }}>
           <SubmitButton />
           {currentRecipe && !pending && (
             <Button
               type="button"
               onClick={handleSaveRecipe}
               variant="secondary"
-              className="font-bold py-3 px-8 rounded-full hover:bg-secondary/90 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg"
+              className="font-bold py-3 px-8 rounded-full hover:bg-secondary/90 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
             >
               Save Recipe
             </Button>
           )}
            <Link href="/saved-recipes" passHref>
-                <Button variant="outline" className="font-bold py-3 px-8 rounded-full hover:bg-accent/10 transition-all duration-300 transform hover:scale-105 shadow-md hover:shadow-lg">My Saved Recipes</Button>
+                <Button variant="outline" className="font-bold py-3 px-8 rounded-full hover:bg-accent/10 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">My Saved Recipes</Button>
             </Link>
         </div>
       </form>
@@ -269,7 +271,7 @@ export function RecipeGenerator() {
         {pending && <div className="mx-auto loader"></div>}
 
         {state.error && !pending && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="animate-in fade-in">
             <Terminal className="h-4 w-4" />
             <AlertTitle>Error</AlertTitle>
             <AlertDescription>{state.error}</AlertDescription>
@@ -277,30 +279,30 @@ export function RecipeGenerator() {
         )}
         
         {saveMessage && (
-            <p className="text-center text-green-600 font-medium mt-4">{saveMessage}</p>
+            <p className="text-center text-green-600 font-medium mt-4 animate-in fade-in">{saveMessage}</p>
         )}
 
         {currentRecipe && !pending && (
-          <div className="prose prose-lg max-w-none bg-background/70 p-6 mt-4 rounded-lg border border-border">
+          <div className="prose prose-lg max-w-none bg-card/80 p-6 mt-4 rounded-lg border animate-in fade-in-up duration-700">
             {nutrition && (
-              <div className="not-prose flex justify-around items-center mb-6 p-4 bg-muted/50 rounded-lg">
-                <div className="text-center">
+              <div className="not-prose flex flex-wrap justify-around items-center mb-6 p-4 bg-muted/50 rounded-lg">
+                <div className="text-center p-2">
                   <Flame className="mx-auto h-8 w-8 text-red-500" />
                   <p className="font-bold text-lg">{nutrition.calories}</p>
                   <p className="text-sm text-muted-foreground">Calories</p>
                 </div>
-                <div className="text-center">
+                <div className="text-center p-2">
                   <Droplet className="mx-auto h-8 w-8 text-yellow-500" />
                   <p className="font-bold text-lg">{nutrition.fat}</p>
                   <p className="text-sm text-muted-foreground">Fat</p>
                 </div>
-                <div className="text-center">
-                  <Beef className="mx-auto h-8 w-8 text-blue-500" />
+                <div className="text-center p-2">
+                  <Beef className="mx-auto h-8 w-8 text-sky-500" />
                   <p className="font-bold text-lg">{nutrition.protein}</p>
                   <p className="text-sm text-muted-foreground">Protein</p>
                 </div>
-                <div className="text-center">
-                  <Wheat className="mx-auto h-8 w-8 text-purple-500" />
+                <div className="text-center p-2">
+                  <Wheat className="mx-auto h-8 w-8 text-amber-600" />
                   <p className="font-bold text-lg">{nutrition.sugar}</p>
                   <p className="text-sm text-muted-foreground">Sugar</p>
                 </div>
