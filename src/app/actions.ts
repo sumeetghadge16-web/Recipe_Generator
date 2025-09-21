@@ -15,13 +15,14 @@ export async function getRecipeAction(
 ): Promise<GenerateRecipeState> {
   const ingredients = formData.get('ingredients') as string;
   const allergies = formData.get('allergies') as string;
+  const photoDataUri = formData.get('photoDataUri') as string | undefined;
 
   if (!ingredients || ingredients.split(',').map(i => i.trim()).filter(Boolean).length < 2) {
     return { error: 'Please enter at least two ingredients to generate a creative recipe.' };
   }
 
   try {
-    const result = await generateRecipeFromIngredients({ ingredients, allergies });
+    const result = await generateRecipeFromIngredients({ ingredients, allergies, photoDataUri });
     return { result, timestamp: Date.now() };
   } catch (e) {
     console.error(e);

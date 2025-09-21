@@ -1,13 +1,14 @@
 'use client';
 
-import { useActionState, useEffect, useState, useMemo } from 'react';
+import { useActionState, useEffect, useState, useMemo, useRef } from 'react';
 import { useFormStatus } from 'react-dom';
+import Image from 'next/image';
 import { getRecipeAction } from '@/app/actions';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Scale } from 'lucide-react';
+import { Flame, Droplet, Beef, Wheat, TrendingUp, TrendingDown, Scale, Upload, X } from 'lucide-react';
 import { Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from './ui/badge';
@@ -85,6 +86,9 @@ export function RecipeGenerator() {
   const [saveMessage, setSaveMessage] = useState('');
   const [ingredients, setIngredients] = useState('');
   const [allergies, setAllergies] = useState('');
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photoDataUri, setPhotoDataUri] = useState<string | undefined>(undefined);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
   
   const currentRecipe = useMemo(() => state.result?.recipe, [state.result]);
@@ -96,6 +100,27 @@ export function RecipeGenerator() {
       setSaveMessage('');
     }
   }, [state.timestamp, state.result]);
+  
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUri = reader.result as string;
+        setPhotoDataUri(dataUri);
+        setPhotoPreview(URL.createObjectURL(file));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemovePhoto = () => {
+    setPhotoPreview(null);
+    setPhotoDataUri(undefined);
+    if(fileInputRef.current) {
+        fileInputRef.current.value = '';
+    }
+  };
 
   const handleSaveRecipe = () => {
     if (currentRecipe) {
@@ -156,24 +181,66 @@ export function RecipeGenerator() {
     <div>
       <form action={formAction} className="text-center">
         <div className='max-w-xl mx-auto'>
-            <Label htmlFor="ingredientsInput" className="block text-xl font-semibold text-foreground mb-2">
-              What ingredients do you have?
-            </Label>
-            <p className="text-muted-foreground mb-4">
-              Enter a few items (e.g., "chicken breast, tomatoes, rice") and let the AI agent create a recipe for you!
-            </p>
-            <div className="relative w-full">
-              <Textarea
-                id="ingredientsInput"
-                name="ingredients"
-                rows={4}
-                className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
-                placeholder="e.g., chicken, broccoli, garlic, lemon, olive oil..."
-                value={ingredients}
-                onChange={(e) => setIngredients(e.target.value)}
-                required
-              />
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                <div>
+                    <Label htmlFor="ingredientsInput" className="block text-xl font-semibold text-foreground mb-2">
+                      What ingredients do you have?
+                    </Label>
+                    <p className="text-muted-foreground mb-4">
+                      Enter a few items (e.g., "chicken breast, tomatoes, rice") and let the AI agent create a recipe for you!
+                    </p>
+                    <div className="relative w-full">
+                      <Textarea
+                        id="ingredientsInput"
+                        name="ingredients"
+                        rows={4}
+                        className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
+                        placeholder="e.g., chicken, broccoli, garlic, lemon, olive oil..."
+                        value={ingredients}
+                        onChange={(e) => setIngredients(e.target.value)}
+                        required
+                      />
+                    </div>
+                </div>
+                <div>
+                    <Label htmlFor="photoInput" className="block text-xl font-semibold text-foreground mb-2">
+                      Upload a photo <span className="text-sm text-muted-foreground">(Optional)</span>
+                    </Label>
+                    <p className="text-muted-foreground mb-4">
+                      Show the AI what your ingredients look like for a better recipe.
+                    </p>
+                    <div className="relative w-full h-32 border-2 border-dashed border-border rounded-lg flex items-center justify-center bg-background hover:border-primary transition-colors">
+                        <input
+                            type="file"
+                            id="photoInput"
+                            ref={fileInputRef}
+                            onChange={handlePhotoChange}
+                            accept="image/*"
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        />
+                        {photoPreview ? (
+                            <>
+                                <Image src={photoPreview} alt="Ingredients preview" layout="fill" objectFit="contain" className="rounded-lg p-1" />
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute top-2 right-2 h-6 w-6 z-10"
+                                    onClick={handleRemovePhoto}
+                                >
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </>
+                        ) : (
+                            <div className="text-center text-muted-foreground">
+                                <Upload className="mx-auto h-8 w-8" />
+                                <p>Click to upload</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
+             <input type="hidden" name="photoDataUri" value={photoDataUri} />
             <Label htmlFor="allergiesInput" className="block text-xl font-semibold text-foreground mt-6 mb-2">
                 Any allergies? <span className="text-sm text-muted-foreground">(Optional)</span>
             </Label>

@@ -18,6 +18,12 @@ const GenerateRecipeFromIngredientsInputSchema = z.object({
     .string()
     .optional()
     .describe('A comma-separated list of allergies to avoid in the recipe.'),
+  photoDataUri: z
+    .string()
+    .optional()
+    .describe(
+      "An optional photo of the ingredients, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+    ),
 });
 export type GenerateRecipeFromIngredientsInput = z.infer<
   typeof GenerateRecipeFromIngredientsInputSchema
@@ -55,14 +61,21 @@ const generateRecipePrompt = ai.definePrompt({
   name: 'generateRecipePrompt',
   input: {schema: GenerateRecipeFromIngredientsInputSchema},
   output: {schema: GenerateRecipeFromIngredientsOutputSchema},
-  prompt: `You are a world-class creative chef and recipe agent. Your mission is to create a delicious, practical, and easy-to-follow recipe using the following ingredients: {{{ingredients}}}.
+  prompt: `You are a world-class creative chef and recipe agent. Your mission is to create a delicious, practical, and easy-to-follow recipe.
+
+You will use the text description and, if provided, a photo of the ingredients as your primary sources of information.
+
+Text-described ingredients: {{{ingredients}}}
+{{#if photoDataUri}}
+Photo of ingredients: {{media url=photoDataUri}}
+{{/if}}
 
 {{#if allergies}}
 **Allergy Alert:** The user is allergic to the following: {{{allergies}}}. You MUST NOT include any of these ingredients or their derivatives in the recipe.
 {{/if}}
 
 **Rules:**
-1.  **Primary Ingredients:** You MUST use the ingredients provided by the user.
+1.  **Primary Ingredients:** You MUST use the ingredients provided by the user (both from the text and identified in the photo).
 2.  **Pantry Staples:** You MAY suggest 1-3 common pantry staples (like salt, pepper, olive oil, water, flour, sugar, basic spices) if they are essential to make a complete dish. Clearly state these.
 3.  **No Exotic Ingredients:** Do not suggest any ingredients that are not on the user's list or are not common pantry staples.
 4.  **Structure:** The recipe must have a clear structure.
