@@ -14,6 +14,10 @@ const GenerateRecipeFromIngredientsInputSchema = z.object({
   ingredients: z
     .string()
     .describe('A comma-separated list of ingredients to use in the recipe.'),
+  allergies: z
+    .string()
+    .optional()
+    .describe('A comma-separated list of allergies to avoid in the recipe.'),
 });
 export type GenerateRecipeFromIngredientsInput = z.infer<
   typeof GenerateRecipeFromIngredientsInputSchema
@@ -52,6 +56,10 @@ const generateRecipePrompt = ai.definePrompt({
   input: {schema: GenerateRecipeFromIngredientsInputSchema},
   output: {schema: GenerateRecipeFromIngredientsOutputSchema},
   prompt: `You are a world-class creative chef and recipe agent. Your mission is to create a delicious, practical, and easy-to-follow recipe using the following ingredients: {{{ingredients}}}.
+
+{{#if allergies}}
+**Allergy Alert:** The user is allergic to the following: {{{allergies}}}. You MUST NOT include any of these ingredients or their derivatives in the recipe.
+{{/if}}
 
 **Rules:**
 1.  **Primary Ingredients:** You MUST use the ingredients provided by the user.

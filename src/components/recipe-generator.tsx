@@ -12,6 +12,7 @@ import { Terminal } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from './ui/badge';
 import { useToast } from '@/hooks/use-toast';
+import { Input } from './ui/input';
 
 const initialState = {
   result: undefined,
@@ -83,6 +84,7 @@ export function RecipeGenerator() {
   const { pending } = useFormStatus();
   const [saveMessage, setSaveMessage] = useState('');
   const [ingredients, setIngredients] = useState('');
+  const [allergies, setAllergies] = useState('');
   const { toast } = useToast();
   
   const currentRecipe = useMemo(() => state.result?.recipe, [state.result]);
@@ -153,23 +155,41 @@ export function RecipeGenerator() {
   return (
     <div>
       <form action={formAction} className="text-center">
-        <Label htmlFor="ingredientsInput" className="block text-xl font-semibold text-foreground mb-2">
-          What ingredients do you have?
-        </Label>
-        <p className="text-muted-foreground mb-4">
-          Enter a few items (e.g., "chicken breast, tomatoes, rice") and let the AI agent create a recipe for you!
-        </p>
-        <div className="relative w-full max-w-xl mx-auto">
-          <Textarea
-            id="ingredientsInput"
-            name="ingredients"
-            rows={4}
-            className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
-            placeholder="e.g., chicken, broccoli, garlic, lemon, olive oil..."
-            value={ingredients}
-            onChange={(e) => setIngredients(e.target.value)}
-            required
-          />
+        <div className='max-w-xl mx-auto'>
+            <Label htmlFor="ingredientsInput" className="block text-xl font-semibold text-foreground mb-2">
+              What ingredients do you have?
+            </Label>
+            <p className="text-muted-foreground mb-4">
+              Enter a few items (e.g., "chicken breast, tomatoes, rice") and let the AI agent create a recipe for you!
+            </p>
+            <div className="relative w-full">
+              <Textarea
+                id="ingredientsInput"
+                name="ingredients"
+                rows={4}
+                className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
+                placeholder="e.g., chicken, broccoli, garlic, lemon, olive oil..."
+                value={ingredients}
+                onChange={(e) => setIngredients(e.target.value)}
+                required
+              />
+            </div>
+            <Label htmlFor="allergiesInput" className="block text-xl font-semibold text-foreground mt-6 mb-2">
+                Any allergies? <span className="text-sm text-muted-foreground">(Optional)</span>
+            </Label>
+            <p className="text-muted-foreground mb-4">
+                List any allergies to exclude from the recipe.
+            </p>
+            <div className="relative w-full">
+                <Input
+                    id="allergiesInput"
+                    name="allergies"
+                    className="w-full p-3 border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-ring transition-shadow bg-background"
+                    placeholder="e.g., gluten, nuts, dairy..."
+                    value={allergies}
+                    onChange={(e) => setAllergies(e.target.value)}
+                />
+            </div>
         </div>
         <div className="flex justify-center items-center space-x-4 mt-5">
           <SubmitButton />
