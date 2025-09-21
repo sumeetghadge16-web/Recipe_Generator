@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { getRecipeAction } from '@/app/actions';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -75,7 +75,7 @@ function markdownToHtml(markdown: string): string {
 }
 
 export function RecipeGenerator() {
-  const [state, formAction] = useFormState(getRecipeAction, initialState);
+  const [state, formAction] = useActionState(getRecipeAction, initialState);
   const { pending } = useFormStatus();
   const [saveMessage, setSaveMessage] = useState('');
   const [currentRecipe, setCurrentRecipe] = useState<string | undefined>();
