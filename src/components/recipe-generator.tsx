@@ -229,7 +229,7 @@ export function RecipeGenerator() {
                     </div>
                 </div>
             </div>
-             <input type="hidden" name="photoDataUri" value={photoDataUri} />
+             <input type="hidden" name="photoDataUri" value={photoDataUri || ''} />
             <Label htmlFor="allergiesInput" className="block text-xl font-semibold text-foreground mt-6 mb-2">
                 Any allergies? <span className="text-sm text-muted-foreground">(Optional)</span>
             </Label>
